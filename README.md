@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# דודה יונה — מאכלי תימן מסורתיים
 
-## Getting Started
+אתר תדמית, תפריט דיגיטלי ומערכת הזמנות למסעדה תימנית.
 
-First, run the development server:
+## טכנולוגיות
+
+- Next.js (App Router) + TypeScript + Tailwind CSS
+- Supabase (PostgreSQL, Auth, Storage)
+- Zod + React Hook Form (בשלבים הבאים לטפסים מורכבים)
+
+## התחלה מהירה
 
 ```bash
+cp .env.example .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+מלאו ב-`.env.local` את פרטי פרויקט ה-Supabase:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (שרת בלבד)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+לאחר מכן הריצו את המיגרציה ב-`supabase/migrations/`.
 
-## Learn More
+## סקריפטים
 
-To learn more about Next.js, take a look at the following resources:
+| פקודה | תיאור |
+|--------|--------|
+| `npm run dev` | שרת פיתוח |
+| `npm run build` | בנייה לפרודקשן |
+| `npm run start` | הרצת build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | בדיקת TypeScript |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## תיעוד
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — אפיון
+- [`DATABASE_SCHEMA.md`](./DATABASE_SCHEMA.md) — סכמת DB
+- [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) — תוכנית שלבים
 
-## Deploy on Vercel
+## אבטחה
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- אין לחשוף `SUPABASE_SERVICE_ROLE_KEY` לדפדפן
+- אזור `/admin` מוגן ב-middleware + בדיקת הרשאות בשרת
+- אינטגרציות (סליקה / WhatsApp / קופה) במצב Demo עד בחירת ספק
