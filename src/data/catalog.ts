@@ -62,6 +62,8 @@ export type MenuItem = {
   slug: string;
   name: string;
   description: string;
+  /** טקסט מורחב לעמוד המנה */
+  longDescription?: string | null;
   categoryId: MenuCategoryId | string;
   priceAgorot: number | null;
   isAvailable: boolean;
@@ -69,6 +71,12 @@ export type MenuItem = {
   badges?: string[];
   sortOrder: number;
   imagePath?: string | null;
+  /** YouTube / Vimeo / קובץ MP4 */
+  videoUrl?: string | null;
+  /** תוספות חינם — מזהים מ-addons.ts; ברירת מחדל לפי קטגוריה */
+  freeAddonIds?: string[];
+  /** תוספות בתשלום */
+  paidAddonIds?: string[];
 };
 
 export type MenuCategory = {
@@ -92,6 +100,8 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק תימני משובח",
     description:
       "מרק תימני משובח עם תוספות: חילבה, סחוג, לחוח, סלוף וירקות.",
+    longDescription:
+      "מרק תימני קלאסי של דודה יונה — מבושל לאט על האש, עשיר ומלא בטעם. מוגש עם תוספות על חשבון הבית: חילבה, סחוג, לחוח, סלוף וירקות. מושלם למשלוח או לאיסוף.",
     categoryId: "soups",
     priceAgorot: 0,
     isAvailable: true,
@@ -317,6 +327,8 @@ export const MENU_ITEMS: MenuItem[] = [
     slug: "jachnun-parve",
     name: "ג'חנון פרווה",
     description: "ג'חנונים פרווה מתוקים של דודה יונה — מוגשים עם תוספות.",
+    longDescription:
+      "ג'חנונים פרווה מתוקים, אפויים בזהירות עד לרכות מושלמת. מוגשים עם ביצים, סחוג ורסק עגבניות על חשבון הבית — חוויה תימנית אותנטית.",
     categoryId: "pastries",
     priceAgorot: 0,
     isAvailable: true,

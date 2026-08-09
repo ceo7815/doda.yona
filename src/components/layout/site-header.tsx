@@ -11,6 +11,7 @@ import { useCart } from "@/stores/cart";
 const NAV_ITEMS = [
   { href: "/", label: "דף הבית" },
   { href: "/about", label: "הסיפור שלנו" },
+  { href: "/magazine", label: "מגזין דודה יונה" },
   { href: "/menu", label: "תפריט והזמנות" },
   { href: "/contact", label: "צרו קשר" },
 ] as const;
@@ -77,7 +78,9 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
               const active =
                 item.href === "/"
                   ? pathname === "/"
-                  : pathname.startsWith(item.href);
+                  : item.href === "/menu"
+                    ? pathname === "/menu" || pathname.startsWith("/menu/")
+                    : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}

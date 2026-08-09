@@ -31,9 +31,9 @@ function OrderLines({ compact = false }: { compact?: boolean }) {
 
   return (
     <ul className="space-y-2.5">
-      {lines.map(({ item, quantity }) => (
+      {lines.map(({ lineKey, item, quantity, addonNotes }) => (
         <li
-          key={item.id}
+          key={lineKey}
           className="rounded-xl border border-border/80 bg-surface-elevated px-3 py-3 shadow-[var(--shadow-card)]"
         >
           <div className="flex items-start justify-between gap-2">
@@ -44,10 +44,15 @@ function OrderLines({ compact = false }: { compact?: boolean }) {
               <p className="mt-0.5 text-xs font-semibold text-gold-700">
                 {formatMenuPrice(item.priceAgorot)}
               </p>
+              {addonNotes ? (
+                <p className="mt-1 line-clamp-2 text-[0.65rem] font-light leading-snug text-ink-muted">
+                  {addonNotes}
+                </p>
+              ) : null}
             </div>
             <button
               type="button"
-              onClick={() => removeItem(item.slug)}
+              onClick={() => removeItem(lineKey)}
               className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-brand-100 hover:text-danger"
               aria-label={`הסרת ${item.name}`}
             >
@@ -59,7 +64,7 @@ function OrderLines({ compact = false }: { compact?: boolean }) {
             <button
               type="button"
               className="inline-flex size-8 items-center justify-center rounded-lg border border-border bg-brand-50 text-brand-900 transition-colors hover:border-gold-500/50"
-              onClick={() => setQuantity(item.slug, quantity - 1)}
+              onClick={() => setQuantity(lineKey, quantity - 1)}
               aria-label="הפחתה"
             >
               <Minus className="size-3.5" />
@@ -70,7 +75,7 @@ function OrderLines({ compact = false }: { compact?: boolean }) {
             <button
               type="button"
               className="inline-flex size-8 items-center justify-center rounded-lg border border-border bg-brand-50 text-brand-900 transition-colors hover:border-gold-500/50"
-              onClick={() => setQuantity(item.slug, quantity + 1)}
+              onClick={() => setQuantity(lineKey, quantity + 1)}
               aria-label="הוספה"
             >
               <Plus className="size-3.5" />

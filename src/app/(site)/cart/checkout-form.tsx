@@ -43,19 +43,16 @@ export function CheckoutForm({ zones }: CheckoutFormProps) {
 
   const itemsPayload = useMemo(
     () =>
-      lines.map(({ item, quantity }) => ({
+      lines.map(({ item, quantity, addonNotes }) => ({
         slug: item.slug,
         quantity,
+        ...(addonNotes ? { notes: addonNotes } : {}),
       })),
     [lines],
   );
 
   const subtotalAgorot = useMemo(
-    () =>
-      lines.reduce((sum, { item, quantity }) => {
-        const price = item.priceAgorot ?? 0;
-        return sum + price * quantity;
-      }, 0),
+    () => lines.reduce((sum, line) => sum + line.lineTotalAgorot, 0),
     [lines],
   );
 

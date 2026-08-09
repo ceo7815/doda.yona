@@ -59,33 +59,44 @@ export default function CartPageClient({ zones }: CartPageClientProps) {
                 </div>
 
                 <ul className="space-y-2.5 sm:space-y-3">
-                  {lines.map(({ item, quantity }) => (
+                  {lines.map(({ lineKey, item, quantity, addonNotes }) => (
                     <li
-                      key={item.id}
+                      key={lineKey}
                       className="flex gap-2.5 rounded-2xl border border-border/80 bg-surface-elevated p-2.5 shadow-[var(--shadow-card)] sm:gap-4 sm:p-4"
                     >
-                      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-brand-100 sm:size-28">
+                      <Link
+                        href={`/menu/${item.slug}`}
+                        className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-brand-100 sm:size-28"
+                      >
                         <DishMedia
                           name={item.name}
                           imagePath={item.imagePath}
                           className="!aspect-auto h-full min-h-0 w-full"
                           sizes="112px"
                         />
-                      </div>
+                      </Link>
 
                       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 sm:gap-3">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h2 className="line-clamp-2 text-sm font-extrabold leading-snug text-brand-900 sm:text-lg">
+                            <Link
+                              href={`/menu/${item.slug}`}
+                              className="line-clamp-2 text-sm font-extrabold leading-snug text-brand-900 hover:text-gold-700 sm:text-lg"
+                            >
                               {item.name}
-                            </h2>
+                            </Link>
                             <p className="mt-0.5 text-sm font-bold text-gold-700">
                               {formatMenuPrice(item.priceAgorot)}
                             </p>
+                            {addonNotes ? (
+                              <p className="mt-1 line-clamp-2 text-xs font-light text-ink-muted">
+                                {addonNotes}
+                              </p>
+                            ) : null}
                           </div>
                           <button
                             type="button"
-                            onClick={() => removeItem(item.slug)}
+                            onClick={() => removeItem(lineKey)}
                             className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-brand-100 hover:text-danger"
                             aria-label={`הסרת ${item.name}`}
                           >
@@ -97,7 +108,7 @@ export default function CartPageClient({ zones }: CartPageClientProps) {
                           <button
                             type="button"
                             className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-brand-50 text-brand-900 transition-colors hover:border-gold-500/40"
-                            onClick={() => setQuantity(item.slug, quantity - 1)}
+                            onClick={() => setQuantity(lineKey, quantity - 1)}
                             aria-label="הפחתה"
                           >
                             <Minus className="size-3.5" />
@@ -108,7 +119,7 @@ export default function CartPageClient({ zones }: CartPageClientProps) {
                           <button
                             type="button"
                             className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-brand-50 text-brand-900 transition-colors hover:border-gold-500/40"
-                            onClick={() => setQuantity(item.slug, quantity + 1)}
+                            onClick={() => setQuantity(lineKey, quantity + 1)}
                             aria-label="הוספה"
                           >
                             <Plus className="size-3.5" />
