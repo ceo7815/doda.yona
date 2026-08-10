@@ -18,21 +18,42 @@ export default function HomePage() {
 
       <section className="border-y border-brand-800 bg-brand-900 py-8 sm:py-11">
         <Container>
-          <ul className="grid grid-cols-3 gap-3 text-center sm:gap-6">
-            {[
-              { label: "אותנטיות", value: "מטבח תימני ביתי" },
-              { label: "כשרות", value: RESTAURANT.kashrutShort },
-              { label: "מיקום", value: RESTAURANT.locationLabel },
-            ].map((item) => (
-              <li key={item.label}>
-                <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500">
-                  {item.label}
-                </p>
-                <p className="mt-1.5 text-xs font-semibold leading-snug text-brand-50 sm:mt-2 sm:text-lg">
-                  {item.value}
-                </p>
-              </li>
-            ))}
+          <ul className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3 sm:gap-6">
+            <li>
+              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
+                <Link
+                  href="/menu"
+                  className="transition-colors hover:text-gold-400"
+                >
+                  לתפריט והזמנות
+                </Link>
+              </p>
+              <p className="mt-1.5 text-sm font-semibold leading-snug sm:mt-2 sm:text-lg">
+                <a
+                  href={`tel:${RESTAURANT.phoneTel}`}
+                  className="text-brand-50 transition-colors hover:text-gold-300"
+                  dir="ltr"
+                >
+                  {RESTAURANT.phoneDisplay}
+                </a>
+              </p>
+            </li>
+            <li>
+              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
+                משלוחים
+              </p>
+              <p className="mt-1.5 text-xs font-semibold leading-snug text-brand-50 sm:mt-2 sm:text-lg">
+                לקחת הביתה
+              </p>
+            </li>
+            <li>
+              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
+                אוכל במקום
+              </p>
+              <p className="mt-1.5 text-xs font-semibold leading-snug text-brand-50 sm:mt-2 sm:text-lg">
+                לאכול במקום
+              </p>
+            </li>
           </ul>
         </Container>
       </section>
