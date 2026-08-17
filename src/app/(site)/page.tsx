@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { GoldFlourish } from "@/components/brand/ornaments";
 import { HomeHero } from "@/components/home/home-hero";
+import { HeroMenuTransition } from "@/components/home/hero-menu-transition";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { FloatingFeatureImage } from "@/components/home/floating-feature-image";
 import { OrderCtaSection } from "@/components/home/order-cta-section";
@@ -15,6 +16,7 @@ export default function HomePage() {
   return (
     <div>
       <HomeHero restaurantName={name} />
+      <HeroMenuTransition restaurantName={name} />
 
       <section className="border-y border-brand-800 bg-brand-900 py-8 sm:py-11">
         <Container>
@@ -68,7 +70,7 @@ export default function HomePage() {
               הסיפור שלנו
             </p>
             <h2 className="mt-3 text-xl font-black tracking-tight text-brand-900 sm:text-4xl">
-              רחמים חוכימה
+              {name}
               <br />
               <span className="text-gold-700">ואהבה שנולדה במטבח</span>
             </h2>

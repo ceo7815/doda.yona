@@ -83,10 +83,15 @@ export function AboutContent({ content }: AboutContentProps) {
             ))}
           </ul>
 
-          <SectionHeading>{content.catering.title}</SectionHeading>
-          <p className="mx-auto mt-3 max-w-xl text-sm font-light leading-relaxed text-ink-muted sm:text-base">
-            {content.catering.body}
-          </p>
+          <div
+            id="catering"
+            className="scroll-mt-[calc(var(--header-height)+1.5rem)]"
+          >
+            <SectionHeading>{content.catering.title}</SectionHeading>
+            <p className="mx-auto mt-3 max-w-xl text-sm font-light leading-relaxed text-ink-muted sm:text-base">
+              {content.catering.body}
+            </p>
+          </div>
 
           <div className="gold-rule mx-auto mt-10 w-16 sm:mt-12" aria-hidden />
 

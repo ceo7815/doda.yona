@@ -9,12 +9,21 @@ import { RESTAURANT } from "@/data/catalog";
 import { useCart } from "@/stores/cart";
 
 const NAV_ITEMS = [
-  { href: "/", label: "דף הבית" },
+  { href: "/menu", label: "תפריט ההזמנות" },
+  { href: "/menu#merakim", label: "מרקים" },
+  { href: "/menu#maafim-temaniim", label: "מאפים" },
+  { href: "/about#catering", label: "קייטרינג" },
   { href: "/about", label: "הסיפור שלנו" },
-  { href: "/magazine", label: "מגזין דודה יונה" },
-  { href: "/menu", label: "תפריט והזמנות" },
-  { href: "/contact", label: "צרו קשר" },
 ] as const;
+
+function pathOf(href: string) {
+  return href.split("#")[0] ?? href;
+}
+
+function hashOf(href: string) {
+  const hash = href.split("#")[1];
+  return hash ? `#${hash}` : "";
+}
 
 type SiteHeaderProps = {
   restaurantName: string;
@@ -24,6 +33,7 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hash, setHash] = useState("");
   const { totalItems } = useCart();
 
   useEffect(() => {
@@ -32,6 +42,13 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const syncHash = () => setHash(window.location.hash);
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, [pathname]);
 
   useEffect(() => {
     setOpen(false);
@@ -45,6 +62,45 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  function isActive(href: string) {
+    const path = pathOf(href);
+    const itemHash = hashOf(href);
+
+    if (path === "/menu") {
+      if (itemHash) return pathname === "/menu" && hash === itemHash;
+      return (
+        (pathname === "/menu" && !hash) || pathname.startsWith("/menu/")
+      );
+    }
+
+    if (path === "/about") {
+      if (itemHash) return pathname.startsWith("/about") && hash === itemHash;
+      return pathname.startsWith("/about") && !hash;
+    }
+
+    return pathname === path;
+  }
+
+  function onNavClick(href: string) {
+    const path = pathOf(href);
+    const itemHash = hashOf(href);
+    const id = itemHash.slice(1);
+
+    if (pathname === path || (path === "/about" && pathname.startsWith("/about"))) {
+      if (id) {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        window.history.replaceState(null, "", href);
+        setHash(itemHash);
+      } else if (path === "/about" || path === "/menu") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.replaceState(null, "", path);
+        setHash("");
+      }
+    }
+
+    setOpen(false);
+  }
 
   return (
     <header className="no-print fixed inset-x-0 top-0 z-50 flex justify-center px-2.5 pt-[max(0.65rem,env(safe-area-inset-top))] sm:px-4 sm:pt-4">
@@ -75,12 +131,7 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
             aria-label="ניווט ראשי"
           >
             {NAV_ITEMS.map((item) => {
-              const active =
-                item.href === "/"
-                  ? pathname === "/"
-                  : item.href === "/menu"
-                    ? pathname === "/menu" || pathname.startsWith("/menu/")
-                    : pathname.startsWith(item.href);
+              const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
@@ -92,6 +143,7 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
                       : "text-brand-50/90 hover:bg-white/5 hover:text-gold-300",
                   )}
                   aria-current={active ? "page" : undefined}
+                  onClick={() => onNavClick(item.href)}
                 >
                   {item.label}
                 </Link>
@@ -136,10 +188,7 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
           >
             <nav className="flex flex-col gap-1 px-3 py-3" aria-label="ניווט מובייל">
               {NAV_ITEMS.map((item) => {
-                const active =
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href);
+                const active = isActive(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -150,19 +199,12 @@ export function SiteHeader({ restaurantName }: SiteHeaderProps) {
                         ? "bg-white/10 text-gold-400"
                         : "text-brand-50 hover:bg-white/5 hover:text-gold-400",
                     )}
-                    onClick={() => setOpen(false)}
+                    onClick={() => onNavClick(item.href)}
                   >
                     {item.label}
                   </Link>
                 );
               })}
-              <Link
-                href="/menu"
-                className="btn-gold mt-2 w-full"
-                onClick={() => setOpen(false)}
-              >
-                לתפריט והזמנות
-              </Link>
             </nav>
           </div>
         ) : null}

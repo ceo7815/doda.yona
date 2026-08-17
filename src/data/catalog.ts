@@ -6,7 +6,6 @@
 export const RESTAURANT = {
   name: "דודה יונה",
   tagline: "מאכלים תימניים אותנטיים",
-  founder: "רחמים חוכימה",
   kashrut: "כשר למהדרין • גלאט כשר",
   kashrutShort: "גלאט כשר",
   neighborhood: "כרם התימנים",
