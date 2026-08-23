@@ -42,7 +42,7 @@ export function FeaturedSection({ items }: FeaturedSectionProps) {
   return (
     <section ref={rootRef} className="surface-paper py-12 sm:py-20 lg:py-24">
       <Container>
-        <SectionBanner title="מומלצים מהבית" />
+        <SectionBanner title="חלק מהתפריט המושלם שלנו" />
         <p className="mx-auto mt-4 max-w-lg px-1 text-center text-sm font-light text-ink-muted sm:mt-5 sm:text-lg">
           המנות שהאורחים חוזרים בשבילן — מרקים עשירים, לחוח טרי ומאפים תימניים.
         </p>
@@ -57,7 +57,7 @@ export function FeaturedSection({ items }: FeaturedSectionProps) {
 
         <div className="mt-8 text-center sm:mt-12">
           <Link href="/menu" className="btn-deep w-full max-w-xs px-8 sm:w-auto">
-            לתפריט המלא והזמנות
+            לתפריט והזמנות אונליין
           </Link>
         </div>
       </Container>

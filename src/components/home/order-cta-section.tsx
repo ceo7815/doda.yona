@@ -54,20 +54,24 @@ export function OrderCtaSection() {
 
           <div className="mt-7 flex flex-col items-center gap-3 text-center sm:mt-8">
             <Link href="/menu" className="btn-deep w-full max-w-xs px-9">
-              הזמינו עכשיו
+              הזמינו אונליין
             </Link>
-            <p className="text-xs font-medium text-ink-muted sm:text-sm">
-              {RESTAURANT.locationLabel}
-              <span className="mx-2 text-gold-600" aria-hidden>
-                ·
-              </span>
-              <Link
-                href="/contact"
-                className="text-gold-700 underline-offset-4 transition-colors hover:text-brand-900 hover:underline"
-              >
-                איך מגיעים
-              </Link>
+            <a
+              href={`tel:${RESTAURANT.phoneTel}`}
+              className="text-lg font-extrabold tracking-wide text-brand-900 transition-colors hover:text-gold-700"
+              dir="ltr"
+            >
+              {RESTAURANT.phoneDisplay}
+            </a>
+            <p className="max-w-sm text-xs font-medium leading-relaxed text-ink-muted sm:text-sm">
+              {RESTAURANT.street}, {RESTAURANT.locationLabel}
             </p>
+            <Link
+              href="/contact"
+              className="text-xs font-medium text-gold-700 underline-offset-4 transition-colors hover:text-brand-900 hover:underline sm:text-sm"
+            >
+              איך מגיעים
+            </Link>
           </div>
         </div>
       </Container>

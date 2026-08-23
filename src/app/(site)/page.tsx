@@ -1,13 +1,19 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { GoldFlourish } from "@/components/brand/ornaments";
 import { HomeHero } from "@/components/home/home-hero";
-import { HeroMenuTransition } from "@/components/home/hero-menu-transition";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { FloatingFeatureImage } from "@/components/home/floating-feature-image";
 import { OrderCtaSection } from "@/components/home/order-cta-section";
-import { BRAND_STORY, RESTAURANT, getFeaturedItems } from "@/data/catalog";
+import { BRAND_STORY, getFeaturedItems } from "@/data/catalog";
 import { getRestaurantName } from "@/lib/env";
+
+const HOME_SERVICES_IMAGE = {
+  src: "/brand/home-services.png",
+  width: 1024,
+  height: 152,
+} as const;
 
 export default function HomePage() {
   const name = getRestaurantName();
@@ -16,48 +22,24 @@ export default function HomePage() {
   return (
     <div>
       <HomeHero restaurantName={name} />
-      <HeroMenuTransition restaurantName={name} />
 
-      <section className="border-y border-brand-800 bg-brand-900 py-8 sm:py-11">
-        <Container>
-          <ul className="grid grid-cols-1 gap-6 text-center sm:grid-cols-3 sm:gap-6">
-            <li>
-              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
-                <Link
-                  href="/menu"
-                  className="transition-colors hover:text-gold-400"
-                >
-                  לתפריט והזמנות
-                </Link>
-              </p>
-              <p className="mt-1.5 text-sm font-semibold leading-snug sm:mt-2 sm:text-lg">
-                <a
-                  href={`tel:${RESTAURANT.phoneTel}`}
-                  className="text-brand-50 transition-colors hover:text-gold-300"
-                  dir="ltr"
-                >
-                  {RESTAURANT.phoneDisplay}
-                </a>
-              </p>
-            </li>
-            <li>
-              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
-                משלוחים
-              </p>
-              <p className="mt-1.5 text-xs font-semibold leading-snug text-brand-50 sm:mt-2 sm:text-lg">
-                לקחת הביתה
-              </p>
-            </li>
-            <li>
-              <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500 sm:text-xs">
-                אוכל במקום
-              </p>
-              <p className="mt-1.5 text-xs font-semibold leading-snug text-brand-50 sm:mt-2 sm:text-lg">
-                לאכול במקום
-              </p>
-            </li>
-          </ul>
-        </Container>
+      <div
+        className="flex items-center justify-center bg-brand-900 py-1.5"
+        aria-hidden
+      >
+        <GoldFlourish className="h-2.5 w-24 text-gold-500/55" />
+      </div>
+
+      <section className="leading-none" aria-label="שירותים וקייטרינג">
+        <Image
+          src={HOME_SERVICES_IMAGE.src}
+          alt={`${name} — הזמנה אונליין, ישיבה במקום, איסוף עצמי, משלוחים וקייטרינג`}
+          width={HOME_SERVICES_IMAGE.width}
+          height={HOME_SERVICES_IMAGE.height}
+          className="h-auto w-full"
+          sizes="100vw"
+          quality={90}
+        />
       </section>
 
       <FeaturedSection items={featured} />

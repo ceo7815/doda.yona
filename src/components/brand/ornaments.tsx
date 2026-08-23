@@ -35,7 +35,7 @@ export function SectionBanner({
 }) {
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
-      <div className="relative inline-flex min-w-[12rem] items-center justify-center rounded-2xl bg-brand-900 px-10 py-3.5 shadow-[var(--shadow-md)]">
+      <div className="relative inline-flex max-w-full min-w-[12rem] items-center justify-center rounded-2xl bg-brand-900 px-8 py-3.5 shadow-[var(--shadow-md)] sm:px-10">
         <span
           className="absolute start-2 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-gold-500"
           aria-hidden
@@ -44,7 +44,7 @@ export function SectionBanner({
           className="absolute end-2 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-gold-500"
           aria-hidden
         />
-        <h2 className="text-xl font-extrabold tracking-wide text-gold-400 sm:text-2xl">
+        <h2 className="px-2 text-center text-lg font-extrabold leading-snug tracking-wide text-gold-400 sm:text-2xl">
           {title}
         </h2>
       </div>
