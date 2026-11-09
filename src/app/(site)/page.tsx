@@ -30,17 +30,6 @@ export default async function HomePage() {
         phoneDisplay={settings.business.phoneDisplay}
       />
 
-      <section className="no-scrollbar overflow-x-auto bg-brand-900 leading-none" aria-label="שירותים וקייטרינג">
-        <Image
-          src="/brand/home-services.webp"
-          alt={`${name} — הזמנה אונליין, ישיבה במקום, איסוף עצמי, משלוחים וקייטרינג`}
-          width={1024}
-          height={152}
-          className="mx-auto h-auto w-[760px] max-w-none sm:w-full sm:max-w-6xl"
-          sizes="(max-width: 640px) 760px, (max-width: 1152px) 100vw, 1152px"
-        />
-      </section>
-
       <FeaturedSection
         items={featured}
         title={settings.home.featuredTitle}

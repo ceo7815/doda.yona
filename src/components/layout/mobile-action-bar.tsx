@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, MessageCircle, Phone } from "lucide-react";
 import type { OrderLink } from "@/lib/site-settings";
 import { OrderButton } from "@/components/site/order-button";
+import { A11yBarButton } from "@/components/accessibility/a11y-bar-button";
 
 type MobileActionBarProps = {
   order: OrderLink;
@@ -48,6 +49,7 @@ export function MobileActionBar({ order, telHref, whatsappHref }: MobileActionBa
             <MessageCircle className="size-5" aria-hidden />
           </a>
         ) : null}
+        <A11yBarButton />
       </div>
     </div>
   );
