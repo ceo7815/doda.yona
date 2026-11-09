@@ -1,11 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin";
+import { refreshPublicSite } from "@/lib/admin/revalidate";
 import { slugify, isMissingTableError } from "@/lib/admin/format";
-import { AppError, toUserMessage } from "@/lib/errors";
-import { shekelsToAgorot } from "@/lib/money";
+import { toUserMessage } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 
@@ -13,63 +12,60 @@ export type ProductActionState = {
   ok: boolean;
   message?: string;
   fieldErrors?: Record<string, string[]>;
+  savedId?: string;
 };
 
 const productSchema = z.object({
-  id: z.string().uuid().optional(),
-  categoryId: z.string().uuid("יש לבחור קטגוריה"),
-  name: z.string().min(1, "שם המנה חובה"),
-  slug: z.string().min(1, "כתובת (slug) חובה"),
-  description: z.string().optional(),
-  priceShekels: z.coerce.number().min(0, "מחיר לא יכול להיות שלילי").optional(),
+  id: z.guid().optional(),
+  categoryId: z.guid("יש לבחור קטגוריה"),
+  name: z.string().min(1, "שם המנה חובה").max(120),
+  slug: z.string().min(1, "כתובת חובה").max(120),
+  description: z.string().max(1000).optional(),
+  imagePath: z.string().max(400).optional(),
   sortOrder: z.coerce.number().int().min(0).default(0),
-  isAvailable: z.coerce.boolean().default(true),
-  isFeatured: z.coerce.boolean().default(false),
-  badges: z.string().optional(),
+  isAvailable: z.boolean(),
+  isFeatured: z.boolean(),
+  badges: z.array(z.string().max(40)).max(6),
 });
 
-function parseBadges(raw: string | undefined): string[] {
-  if (!raw?.trim()) return [];
-  return raw
-    .split(",")
-    .map((b) => b.trim())
-    .filter(Boolean);
-}
+const checked = (fd: FormData, key: string) => fd.get(key) === "on" || fd.get(key) === "true";
 
 function parseProductForm(formData: FormData) {
-  const rawSlug = String(formData.get("slug") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
-  const priceRaw = String(formData.get("priceShekels") ?? "").trim();
-
+  const rawSlug = String(formData.get("slug") ?? "").trim();
   return {
     id: formData.get("id") ? String(formData.get("id")) : undefined,
     categoryId: String(formData.get("categoryId") ?? ""),
     name,
-    slug: rawSlug || slugify(name),
+    slug: slugify(rawSlug || name),
     description: String(formData.get("description") ?? "").trim() || undefined,
-    priceShekels: priceRaw === "" ? 0 : priceRaw,
-    sortOrder: formData.get("sortOrder"),
-    isAvailable:
-      formData.get("isAvailable") === "on" || formData.get("isAvailable") === "true",
-    isFeatured:
-      formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true",
-    badges: String(formData.get("badges") ?? ""),
+    imagePath: String(formData.get("imagePath") ?? "").trim() || undefined,
+    sortOrder: formData.get("sortOrder") || 0,
+    isAvailable: checked(formData, "isAvailable"),
+    isFeatured: checked(formData, "isFeatured"),
+    badges: String(formData.get("badges") ?? "")
+      .split(",")
+      .map((b) => b.trim())
+      .filter(Boolean),
   };
+}
+
+async function guard(): Promise<string | null> {
+  if (!isSupabaseConfigured()) return "מסד הנתונים לא מחובר.";
+  try {
+    await requireAdmin();
+    return null;
+  } catch (error) {
+    return toUserMessage(error);
+  }
 }
 
 export async function saveProduct(
   _prev: ProductActionState,
   formData: FormData,
 ): Promise<ProductActionState> {
-  if (!isSupabaseConfigured()) {
-    return { ok: false, message: "מסד הנתונים לא מחובר." };
-  }
-
-  try {
-    await requireAdmin();
-  } catch (error) {
-    return { ok: false, message: toUserMessage(error) };
-  }
+  const denied = await guard();
+  if (denied) return { ok: false, message: denied };
 
   const parsed = productSchema.safeParse(parseProductForm(formData));
   if (!parsed.success) {
@@ -80,86 +76,58 @@ export async function saveProduct(
     };
   }
 
-  const supabase = await createClient();
+  const d = parsed.data;
   const payload = {
-    category_id: parsed.data.categoryId,
-    name: parsed.data.name,
-    slug: parsed.data.slug,
-    description: parsed.data.description ?? null,
-    price_agorot: shekelsToAgorot(parsed.data.priceShekels ?? 0),
-    sort_order: parsed.data.sortOrder,
-    is_available: parsed.data.isAvailable,
-    is_featured: parsed.data.isFeatured,
-    badges: parseBadges(parsed.data.badges),
+    category_id: d.categoryId,
+    name: d.name,
+    slug: d.slug,
+    description: d.description ?? null,
+    image_path: d.imagePath ?? null,
+    sort_order: d.sortOrder,
+    is_available: d.isAvailable,
+    is_featured: d.isFeatured,
+    badges: d.badges,
   };
 
-  if (parsed.data.id) {
-    const { error } = await supabase
-      .from("products")
-      .update(payload)
-      .eq("id", parsed.data.id)
-      .is("deleted_at", null);
+  const supabase = await createClient();
+  const result = d.id
+    ? await supabase.from("products").update(payload).eq("id", d.id).is("deleted_at", null).select("id").single()
+    : await supabase.from("products").insert(payload).select("id").single();
 
-    if (error) {
-      if (isMissingTableError(error)) {
-        return { ok: false, message: "טבלת המנות עדיין לא קיימת. הריצו את המיגרציות." };
-      }
-      return { ok: false, message: "לא ניתן לעדכן את המנה." };
+  if (result.error) {
+    if (isMissingTableError(result.error)) {
+      return { ok: false, message: "טבלת המנות עדיין לא קיימת." };
     }
-  } else {
-    const { error } = await supabase.from("products").insert(payload);
-    if (error) {
-      if (isMissingTableError(error)) {
-        return { ok: false, message: "טבלת המנות עדיין לא קיימת. הריצו את המיגרציות." };
-      }
-      if (error.code === "23505") {
-        return { ok: false, message: "כתובת (slug) זו כבר בשימוש." };
-      }
-      return { ok: false, message: "לא ניתן ליצור את המנה." };
+    if (result.error.code === "23505") {
+      return { ok: false, message: "כתובת זו כבר בשימוש במנה אחרת.", fieldErrors: { slug: ["כתובת תפוסה"] } };
     }
+    return { ok: false, message: "השמירה נכשלה. נסו שוב." };
   }
 
-  revalidatePath("/admin/products");
-  return { ok: true, message: parsed.data.id ? "המנה עודכנה." : "המנה נוספה." };
+  refreshPublicSite();
+  return { ok: true, message: d.id ? "המנה עודכנה." : "המנה נוספה.", savedId: result.data.id };
 }
 
-export async function toggleProductAvailability(formData: FormData): Promise<void> {
-  if (!isSupabaseConfigured()) return;
-
-  await requireAdmin();
+export async function toggleProductFlag(formData: FormData): Promise<void> {
+  if (await guard()) return;
   const id = String(formData.get("id") ?? "");
-  const isAvailable = formData.get("isAvailable") === "true";
+  const flag = String(formData.get("flag") ?? "");
+  const value = formData.get("value") === "true";
+  if (flag !== "is_available" && flag !== "is_featured") return;
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("products")
-    .update({ is_available: isAvailable })
-    .eq("id", id)
-    .is("deleted_at", null);
-
-  if (error) {
-    throw new AppError("INTERNAL", { message: error.message });
-  }
-
-  revalidatePath("/admin/products");
+  await supabase.from("products").update({ [flag]: value }).eq("id", id).is("deleted_at", null);
+  refreshPublicSite();
 }
 
 export async function deleteProduct(formData: FormData): Promise<void> {
-  if (!isSupabaseConfigured()) return;
-
-  await requireAdmin();
+  if (await guard()) return;
   const id = String(formData.get("id") ?? "");
-
   const supabase = await createClient();
-  const { error } = await supabase
+  await supabase
     .from("products")
     .update({ deleted_at: new Date().toISOString(), is_available: false })
     .eq("id", id)
     .is("deleted_at", null);
-
-  if (error) {
-    throw new AppError("INTERNAL", { message: error.message });
-  }
-
-  revalidatePath("/admin/products");
+  refreshPublicSite();
 }

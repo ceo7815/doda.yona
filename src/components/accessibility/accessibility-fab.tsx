@@ -31,12 +31,12 @@ export function AccessibilityFab() {
     useAccessibility();
 
   return (
-    <div className="no-print fixed start-auto end-auto left-3 top-1/2 z-[60] -translate-y-1/2 sm:left-4">
+    <div className="no-print fixed left-4 top-[calc(50%-1.75rem)] z-[60]">
       <button
         type="button"
         onClick={() => setPanelOpen(!panelOpen)}
         className={cn(
-          "inline-flex size-12 items-center justify-center rounded-full border border-gold-500/40 bg-brand-900 text-gold-400 shadow-[0_8px_28px_rgb(20_13_8/0.35)] transition-[background-color,transform,box-shadow] hover:bg-brand-800 hover:text-gold-300 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-95 sm:size-14",
+          "hidden size-14 items-center justify-center rounded-full border border-gold-500/40 lg:inline-flex bg-brand-900 text-gold-400 shadow-[0_8px_28px_rgb(20_13_8/0.35)] transition-[background-color,transform,box-shadow] hover:bg-brand-800 hover:text-gold-300 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-95 sm:size-14",
           panelOpen && "ring-2 ring-gold-500/50",
         )}
         aria-expanded={panelOpen}
@@ -63,7 +63,7 @@ export function AccessibilityFab() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="a11y-panel-title"
-            className="fixed left-16 top-1/2 z-10 w-[min(19rem,calc(100vw-5rem))] -translate-y-1/2 rounded-2xl border border-gold-500/30 bg-brand-900 p-4 text-brand-50 shadow-[0_16px_48px_rgb(20_13_8/0.45)] sm:left-[4.75rem] sm:w-80 sm:p-5"
+            className="fixed left-3 top-1/2 z-10 w-[min(20rem,calc(100vw-1.5rem))] -translate-y-1/2 lg:left-[5.25rem] rounded-2xl border border-gold-500/30 bg-brand-900 p-4 text-brand-50 shadow-[0_16px_48px_rgb(20_13_8/0.45)] sm:w-80 sm:p-5"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

@@ -9,7 +9,7 @@ const rubik = Rubik({
   subsets: ["hebrew", "latin"],
   variable: "--font-rubik",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  // גופן משתנה (variable) — קובץ אחד לכל המשקלים במקום 7 קבצים
 });
 
 const restaurantName = getRestaurantName();
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: `${restaurantName} — ${RESTAURANT.tagline}`,
     template: `%s | ${restaurantName}`,
   },
-  description: `${RESTAURANT.tagline} ב${RESTAURANT.locationLabel}. ${RESTAURANT.kashrut}. משלוחים ואיסוף עצמי.`,
+  description: `${RESTAURANT.tagline} ב${RESTAURANT.locationLabel}. ${RESTAURANT.kashrut}. משלוחים, איסוף עצמי וישיבה במקום.`,
   metadataBase: process.env.NEXT_PUBLIC_APP_URL
     ? new URL(process.env.NEXT_PUBLIC_APP_URL)
     : undefined,
@@ -36,10 +36,17 @@ export const metadata: Metadata = {
     siteName: restaurantName,
     title: `${restaurantName} — ${RESTAURANT.tagline}`,
     description: `מסעדה תימנית ב${RESTAURANT.locationLabel}. ${RESTAURANT.kashrutShort}.`,
+    images: [{ url: "/brand/home-hero.webp", width: 1024, height: 524 }],
   },
+  alternates: { canonical: "/" },
+  robots:
+    process.env.NEXT_PUBLIC_NOINDEX === "1"
+      ? { index: false, follow: false }
+      : undefined,
 };
 
 const a11yBootScript = `
+document.documentElement.classList.add("js");
 try {
   var raw = localStorage.getItem("doda-yona-a11y-v1");
   if (raw) {
@@ -67,6 +74,7 @@ export default function RootLayout({
       lang="he"
       dir="rtl"
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${rubik.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">

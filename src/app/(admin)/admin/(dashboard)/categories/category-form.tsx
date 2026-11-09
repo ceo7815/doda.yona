@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { saveCategory, type CategoryActionState } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AdminCard, Field, FormMessage, TextArea, Toggle } from "@/components/admin/ui";
 
 export type CategoryFormValues = {
   id?: string;
@@ -16,95 +17,41 @@ export type CategoryFormValues = {
 
 const initialState: CategoryActionState = { ok: false };
 
-type CategoryFormProps = {
-  initial?: CategoryFormValues;
-  onSuccess?: () => void;
-};
-
-export function CategoryForm({ initial, onSuccess }: CategoryFormProps) {
+export function CategoryForm({ initial }: { initial?: CategoryFormValues }) {
   const [state, formAction, pending] = useActionState(saveCategory, initialState);
+  const router = useRouter();
+  const isEdit = Boolean(initial?.id);
+  const err = (k: string) => state.fieldErrors?.[k]?.[0];
 
   useEffect(() => {
-    if (state.ok && onSuccess) {
-      onSuccess();
-    }
-  }, [state.ok, onSuccess]);
+    if (state.ok) router.replace("/admin/categories");
+  }, [state.ok, router]);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-md border border-border p-4">
-      <h2 className="text-lg font-bold text-ink">
-        {initial?.id ? "עריכת קטגוריה" : "קטגוריה חדשה"}
-      </h2>
-
-      {initial?.id ? <input type="hidden" name="id" value={initial.id} /> : null}
-
-      {state.message ? (
-        <p
-          className={`rounded-md px-3 py-2 text-sm ${state.ok ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}
-          role={state.ok ? "status" : "alert"}
-        >
-          {state.message}
-        </p>
-      ) : null}
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          name="name"
-          label="שם הקטגוריה"
-          defaultValue={initial?.name ?? ""}
-          required
-          error={state.fieldErrors?.name?.[0]}
-        />
-        <Input
-          name="slug"
-          label="כתובת (slug)"
-          defaultValue={initial?.slug ?? ""}
-          hint="אם ריק — ייווצר אוטומטית מהשם"
-          error={state.fieldErrors?.slug?.[0]}
-          dir="ltr"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="description" className="text-sm font-medium text-ink">
-          תיאור
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          defaultValue={initial?.description ?? ""}
-          className="mt-1.5 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-base text-ink"
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          name="sortOrder"
-          label="סדר תצוגה"
-          type="number"
-          min={0}
-          defaultValue={initial?.sortOrder ?? 0}
-          error={state.fieldErrors?.sortOrder?.[0]}
-        />
-        <div className="flex items-end pb-2">
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="isActive"
-              defaultChecked={initial?.isActive ?? true}
-              className="size-4 rounded border-border"
-            />
-            פעילה באתר
-          </label>
+    <AdminCard title={isEdit ? `עריכת קטגוריה: ${initial!.name}` : "קטגוריה חדשה"}>
+      <form action={formAction} className="space-y-4">
+        {initial?.id ? <input type="hidden" name="id" value={initial.id} /> : null}
+        <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
+          <Field label="שם הקטגוריה" name="name" defaultValue={initial?.name ?? ""} required error={err("name")} />
+          <Field label="סדר תצוגה" name="sortOrder" type="number" min={0} defaultValue={initial?.sortOrder ?? 0} error={err("sortOrder")} hint="מספר קטן מופיע קודם" />
         </div>
-      </div>
-
-      <div className="flex gap-2">
-        <Button type="submit" loading={pending}>
-          {initial?.id ? "שמירה" : "הוספה"}
-        </Button>
-      </div>
-    </form>
+        <TextArea label="תיאור (לא חובה)" name="description" defaultValue={initial?.description ?? ""} rows={2} />
+        <details className="rounded-xl border border-border/70 bg-white/60 px-4 py-2 text-sm">
+          <summary className="cursor-pointer py-1 font-bold text-brand-900">הגדרות מתקדמות</summary>
+          <Field className="mt-3" label="כתובת (slug)" name="slug" defaultValue={initial?.slug ?? ""} hint="אם ריק — נוצרת אוטומטית מהשם" dir="ltr" error={err("slug")} />
+        </details>
+        <Toggle name="isActive" label="מוצגת באתר" defaultChecked={initial?.isActive ?? true} />
+        <FormMessage ok={state.ok} message={state.message} />
+        <div className="flex items-center gap-3">
+          <button type="submit" disabled={pending} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand-900 px-7 font-bold text-gold-400 shadow-md hover:bg-brand-800 disabled:opacity-50">
+            {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+            {isEdit ? "שמירת שינויים" : "הוספה"}
+          </button>
+          <button type="button" onClick={() => router.push("/admin/categories")} className="min-h-12 px-4 text-sm font-semibold text-ink-muted hover:text-brand-900">
+            ביטול
+          </button>
+        </div>
+      </form>
+    </AdminCard>
   );
 }

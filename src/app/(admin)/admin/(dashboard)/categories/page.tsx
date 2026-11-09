@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ConfirmSubmit } from "@/components/admin/confirm-submit";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { SupabaseNotice } from "@/components/admin/supabase-notice";
-import { Button } from "@/components/ui/button";
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { StatusPill } from "@/components/admin/ui";
 import { isMissingTableError } from "@/lib/admin/format";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -26,9 +28,9 @@ type CategoryRow = {
 export default async function AdminCategoriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; new?: string }>;
 }) {
-  const { edit } = await searchParams;
+  const { edit, new: isNew } = await searchParams;
   const configured = isSupabaseConfigured();
 
   let categories: CategoryRow[] = [];
@@ -46,7 +48,7 @@ export default async function AdminCategoriesPage({
 
     if (error) {
       dbError = isMissingTableError(error)
-        ? "טבלת הקטגוריות עדיין לא קיימת. הריצו את המיגרציות."
+        ? "טבלת הקטגוריות עדיין לא קיימת."
         : "לא ניתן לטעון קטגוריות.";
     } else {
       categories = data ?? [];
@@ -66,98 +68,58 @@ export default async function AdminCategoriesPage({
     }
   }
 
+  const showForm = Boolean(editing) || isNew === "1";
+
   return (
-    <div className="space-y-6">
+    <>
       <AdminPageHeader
         title="קטגוריות"
-        description="ניהול קטגוריות התפריט — סדר, הפעלה והסתרה."
+        description="סדר הקטגוריות בתפריט, והסתרה של קטגוריה שלמה."
+        actions={
+          configured && !showForm ? (
+            <Link href="/admin/categories?new=1" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-brand-900 px-5 font-bold text-gold-400 shadow-md hover:bg-brand-800">
+              <Plus className="size-4" aria-hidden />
+              קטגוריה חדשה
+            </Link>
+          ) : null
+        }
       />
-
       {!configured ? <SupabaseNotice /> : null}
-      {dbError ? (
-        <div className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
-          {dbError}
-        </div>
-      ) : null}
+      {dbError ? <p className="rounded-xl bg-warning/10 px-4 py-3 text-sm">{dbError}</p> : null}
+      {showForm ? <CategoryForm key={editing?.id ?? "new"} initial={editing} /> : null}
 
-      {configured && !dbError ? (
-        <>
-          <CategoryForm key={editing?.id ?? "new"} initial={editing} />
-
-          <section className="rounded-md border border-border">
-            <div className="border-b border-border px-4 py-3">
-              <h2 className="font-bold text-ink">
-                {categories.length === 0 ? "אין קטגוריות עדיין" : `${categories.length} קטגוריות`}
-              </h2>
-            </div>
-
-            {categories.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-ink-muted">
-                הוסיפו קטגוריה ראשונה באמצעות הטופס למעלה — למשל &quot;מרקים&quot;, &quot;מאפים תימניים&quot;, &quot;תוספות&quot;.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-brand-50 text-start">
-                      <th className="px-4 py-2 font-medium">שם</th>
-                      <th className="px-4 py-2 font-medium">סדר</th>
-                      <th className="px-4 py-2 font-medium">סטטוס</th>
-                      <th className="px-4 py-2 font-medium">פעולות</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {categories.map((cat) => (
-                      <tr key={cat.id} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-ink">{cat.name}</p>
-                          <p className="text-xs text-ink-muted" dir="ltr">
-                            {cat.slug}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3">{cat.sort_order}</td>
-                        <td className="px-4 py-3">
-                          <form action={toggleCategoryActive}>
-                            <input type="hidden" name="id" value={cat.id} />
-                            <input
-                              type="hidden"
-                              name="isActive"
-                              value={String(!cat.is_active)}
-                            />
-                            <Button
-                              type="submit"
-                              size="sm"
-                              variant={cat.is_active ? "secondary" : "outline"}
-                            >
-                              {cat.is_active ? "פעילה" : "מוסתרת"}
-                            </Button>
-                          </form>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Link
-                              href={`/admin/categories?edit=${cat.id}`}
-                              className="text-sm text-brand-700 underline"
-                            >
-                              עריכה
-                            </Link>
-                            <form action={deleteCategory}>
-                              <input type="hidden" name="id" value={cat.id} />
-                              <Button type="submit" size="sm" variant="ghost" className="text-danger">
-                                הסרה
-                              </Button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      {categories.length > 0 ? (
+        <ul className="overflow-hidden rounded-2xl border border-border/80 bg-surface-elevated">
+          {categories.map((cat) => (
+            <li key={cat.id} className="flex items-center gap-3 border-b border-border/60 px-4 py-3.5 last:border-0">
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-ink-muted">{cat.sort_order}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-bold text-brand-900">{cat.name}</p>
+                {cat.description ? <p className="truncate text-xs text-ink-muted">{cat.description}</p> : null}
               </div>
-            )}
-          </section>
-        </>
+              <StatusPill on={cat.is_active} onLabel="מוצגת" offLabel="מוסתרת" />
+              <div className="flex shrink-0 items-center">
+                <form action={toggleCategoryActive}>
+                  <input type="hidden" name="id" value={cat.id} />
+                  <input type="hidden" name="isActive" value={String(!cat.is_active)} />
+                  <button type="submit" className="admin-icon-btn" aria-label={cat.is_active ? "הסתרה" : "הצגה"} title={cat.is_active ? "הסתרה" : "הצגה"}>
+                    {cat.is_active ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                  </button>
+                </form>
+                <Link href={`/admin/categories?edit=${cat.id}`} className="admin-icon-btn" aria-label={`עריכת ${cat.name}`} title="עריכה">
+                  <Pencil className="size-4" aria-hidden />
+                </Link>
+                <form action={deleteCategory}>
+                  <input type="hidden" name="id" value={cat.id} />
+                  <ConfirmSubmit className="admin-icon-btn text-danger" label={`מחיקת ${cat.name}`} message={`למחוק את הקטגוריה «${cat.name}»? היא תוסר מהתפריט באתר.`}>
+                    <Trash2 className="size-4" aria-hidden />
+                  </ConfirmSubmit>
+                </form>
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : null}
-    </div>
+    </>
   );
 }

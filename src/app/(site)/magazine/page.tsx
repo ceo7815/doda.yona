@@ -9,6 +9,8 @@ import { RESTAURANT } from "@/data/catalog";
 export const metadata: Metadata = {
   title: "מגזין דודה יונה",
   description: `מגזין דודה יונה — סיפורים, מתכונים וטעמים מהמטבח התימני של ${RESTAURANT.name}.`,
+  // לא באפיון ועדיין ללא מאמרים מלאים — מחוץ לניווט ולמנועי החיפוש עד שיוחלט
+  robots: { index: false, follow: true },
 };
 
 const ARTICLES = [
@@ -17,7 +19,7 @@ const ARTICLES = [
     title: "הסוד מאחורי הקובנה של דודה יונה",
     excerpt:
       "איך קובנה אחת הופכת לבוקר שלם — על האש, על הסבלנות, ועל הזיכרון שמבשלים יחד.",
-    image: "/brand/kubaneh-feature.png",
+    image: "/brand/kubaneh-feature.webp",
     tag: "מסורת",
   },
   {
@@ -25,7 +27,7 @@ const ARTICLES = [
     title: "מדריך קצר לסחוג תימני",
     excerpt:
       "מה ההבדל בין סחוג ירוק לסחוג אדום, ואיך מגישים אותו לצד מרקים ומאפים.",
-    image: "/menu/marak-temani.png",
+    image: "/menu/marak-temani.webp",
     tag: "טיפים",
   },
   {
@@ -33,7 +35,7 @@ const ARTICLES = [
     title: "שולחן שבת תימני בבית",
     excerpt:
       "מעורב מאפים, ביצים, רסק עגבניות — איך בונים שולחן שמרגיש כמו בכרם התימנים.",
-    image: "/menu/meurav-maafim-temani.png",
+    image: "/menu/meurav-maafim-temani.webp",
     tag: "שבת",
   },
   {
@@ -41,7 +43,7 @@ const ARTICLES = [
     title: "למה מרק תימני מתבשל כל כך לאט",
     excerpt:
       "מרק שמבשלים שעות — על הבשר, על העצם, ועל הטעם שאי אפשר למהר.",
-    image: "/menu/marak-meurav-keves.png",
+    image: "/menu/marak-meurav-keves.webp",
     tag: "מרקים",
   },
 ] as const;
@@ -107,10 +109,10 @@ export default function MagazinePage() {
               מהמגזין ישר לתפריט
             </h3>
             <p className="mt-3 text-sm font-light text-brand-200">
-              בחרו מנות, תוספות ומשלוח — הכל אונליין.
+              משלוח, איסוף או ישיבה במקום — דרך מערכת ההזמנות של המסעדה או בטלפון.
             </p>
             <Link href="/menu" className="btn-gold mt-6 inline-flex px-8">
-              לתפריט והזמנות
+              לתפריט
             </Link>
           </div>
         </Container>

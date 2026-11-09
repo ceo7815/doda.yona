@@ -1,10 +1,3 @@
-import { formatMenuPrice } from "@/data/catalog";
-
-/** תצוגת מחיר באדמין — כולל ₪0.00 */
-export function formatAdminPrice(agorot: number): string {
-  return formatMenuPrice(agorot);
-}
-
 export function slugify(value: string): string {
   return value
     .trim()

@@ -1,6 +1,7 @@
 /**
  * פרטי מסעדה ומטען מותג — לפי חומרי הלקוח + הסכם.
- * מחיר 0 / null מוצג כ־₪0.00 עד שיסופק מחיר אמיתי.
+ * ברירות מחדל סטטיות — האתר נופל אליהן כשאין חיבור למסד הנתונים.
+ * מחירים והזמנות מנוהלים במערכת הקופה של המסעדה, לא באתר.
  */
 
 export const RESTAURANT = {
@@ -57,8 +58,8 @@ export const ABOUT_PAGE = {
   },
   infoSections: [
     {
-      title: "מחירים",
-      body: "המחירים מוצגים ליד כל מנה בתפריט ההזמנות.",
+      title: "מחירים והזמנות",
+      body: "המחירים המעודכנים וההזמנות מתבצעים דרך מערכת ההזמנות של המסעדה.",
     },
     {
       title: "משלוחים",
@@ -73,16 +74,6 @@ export const ABOUT_PAGE = {
       body: "ניתן להזמין מקום מראש וליהנות מחוויית אירוח תימנית אותנטית.",
     },
   ],
-  onlineOrdering: {
-    title: "הזמנה אונליין",
-    items: [
-      "הוספה לסל קניות",
-      "בחירת תוספות",
-      "משלוח או איסוף עצמי",
-      "הזמנת מקומות ישיבה",
-      "תשלום מאובטח אונליין",
-    ],
-  },
   catering: {
     title: "קייטרינג",
     body: "קייטרינג למאכלים תימניים אותנטיים לאירועי שמחה, שבתות, בריתות, אזכרות ובתי אבל – במחירים מיוחדים ובהתאמה אישית.",
@@ -109,18 +100,11 @@ export type MenuItem = {
   /** טקסט מורחב לעמוד המנה */
   longDescription?: string | null;
   categoryId: MenuCategoryId | string;
-  priceAgorot: number | null;
   isAvailable: boolean;
   isFeatured: boolean;
   badges?: string[];
   sortOrder: number;
   imagePath?: string | null;
-  /** YouTube / Vimeo / קובץ MP4 */
-  videoUrl?: string | null;
-  /** תוספות חינם — מזהים מ-addons.ts; ברירת מחדל לפי קטגוריה */
-  freeAddonIds?: string[];
-  /** תוספות בתשלום */
-  paidAddonIds?: string[];
 };
 
 export type MenuCategory = {
@@ -147,12 +131,11 @@ export const MENU_ITEMS: MenuItem[] = [
     longDescription:
       "מרק תימני קלאסי של דודה יונה — מבושל לאט על האש, עשיר ומלא בטעם. מוגש עם תוספות על חשבון הבית: חילבה, סחוג, לחוח, סלוף וירקות. מושלם למשלוח או לאיסוף.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 1,
-    imagePath: "/menu/marak-temani.png",
+    imagePath: "/menu/marak-temani.webp",
   },
   {
     id: "soup-meurav-keves",
@@ -161,12 +144,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מרק מעורב תימני עם כבש ומוח עצם של דודה יונה — עשיר ומבושל לאט.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 2,
-    imagePath: "/menu/marak-meurav-keves.png",
+    imagePath: "/menu/marak-meurav-keves.webp",
   },
   {
     id: "soup-gulash",
@@ -174,12 +156,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק גולש תימני",
     description: "מרק גולש תימני — בשר ותפוחי אדמה ברוטב עשיר ומסורתי.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 3,
-    imagePath: "/menu/marak-gulash-temani.png",
+    imagePath: "/menu/marak-gulash-temani.webp",
   },
   {
     id: "soup-bone-marrow",
@@ -188,12 +169,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מרק מוח עצם — בתוספת חילבה, סחוג, סלוף או לחוח וירקות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 4,
-    imagePath: "/menu/marak-moach-etzem-tosafot.png",
+    imagePath: "/menu/marak-moach-etzem-tosafot.webp",
   },
   {
     id: "soup-lamb-roast",
@@ -201,12 +181,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "בשר כבש צלוי משובח",
     description: "בשר כבש צלוי משובח — עסיסי ומבושל לאט במסורת הבית.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 5,
-    imagePath: "/menu/basar-keves-tzaluy.png",
+    imagePath: "/menu/basar-keves-tzaluy.webp",
   },
   {
     id: "main-steak",
@@ -214,12 +193,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "סטק בקר",
     description: "סטק בקר עם ירקות מבושלים — בתוספת אורז או קוסקוס.",
     categoryId: "mains",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 1,
-    imagePath: "/menu/steak-bakar.png",
+    imagePath: "/menu/steak-bakar.webp",
   },
   {
     id: "main-lamb-chops",
@@ -227,12 +205,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "צלעות כבש",
     description: "צלעות כבש על הגריל — מוגשות עם תוספות.",
     categoryId: "mains",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 2,
-    imagePath: "/menu/tzlaot-keves.png",
+    imagePath: "/menu/tzlaot-keves.webp",
   },
   {
     id: "main-fish",
@@ -240,12 +217,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "דג תימני משובח",
     description: "דג תימני משובח — מוגש עם תוספות ירקות ועוד.",
     categoryId: "mains",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 3,
-    imagePath: "/menu/dag-temani.png",
+    imagePath: "/menu/dag-temani.webp",
   },
   {
     id: "soup-shwaya",
@@ -253,12 +229,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק שוויה תימני אסלי",
     description: "מרק שוויה תימני אסלי — תבשיל בשר עשיר במסורת הבית.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 9,
-    imagePath: "/menu/shwaya.png",
+    imagePath: "/menu/shwaya.webp",
   },
   {
     id: "soup-chicken",
@@ -267,12 +242,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "טרי ובריא — מרק עוף בתוספת חילבה, סחוג, סלוף או לחוח וירקות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 10,
-    imagePath: "/menu/marak-of.png",
+    imagePath: "/menu/marak-of.webp",
   },
   {
     id: "soup-oxtail",
@@ -280,7 +254,6 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק זנב שור",
     description: "מרק זנב שור — עשיר ומבושל לאט, מוגש עם תוספות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
@@ -293,12 +266,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מרק רגל תימני — בתוספת ירקות, חילבה, סחוג, סלוף או לחוח.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 12,
-    imagePath: "/menu/marak-regel.png",
+    imagePath: "/menu/marak-regel.webp",
   },
   {
     id: "soup-leg-spicy",
@@ -307,12 +279,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מרק רגל פיקנטי עם אורז, תפוח אדמה, גזר וגרגרי חומוס.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ", "פיקנטי"],
     sortOrder: 13,
-    imagePath: "/menu/marak-regel-pikanti.png",
+    imagePath: "/menu/marak-regel-pikanti.webp",
   },
   {
     id: "soup-beef-beans",
@@ -321,12 +292,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מרק שעועית מזינה ומשובחת — בתוספת חילבה, סחוג, סלוף וירקות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 14,
-    imagePath: "/menu/marak-sheuit.png",
+    imagePath: "/menu/marak-sheuit.webp",
   },
   {
     id: "soup-beans-lamb",
@@ -334,12 +304,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק שעועית וטלה",
     description: "מרק שעועית וטלה — עשיר ומבושל לאט עם ירקות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 15,
-    imagePath: "/menu/marak-sheuit-taleh.png",
+    imagePath: "/menu/marak-sheuit-taleh.webp",
   },
   {
     id: "soup-beef",
@@ -347,7 +316,6 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מרק בשר",
     description: "מרק בשר קלאסי עם ירקות.",
     categoryId: "soups",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 16,
@@ -359,12 +327,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "מגש מאפים תימניים מסורתיים: ג'חנונים, זלביות וסאבייה — מוגש עם תוספות ביצים, סחוג ורסק עגבניות.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 1,
-    imagePath: "/menu/meurav-maafim-temani.png",
+    imagePath: "/menu/meurav-maafim-temani.webp",
   },
   {
     id: "pastry-jachnun",
@@ -374,12 +341,11 @@ export const MENU_ITEMS: MenuItem[] = [
     longDescription:
       "ג'חנונים פרווה מתוקים, אפויים בזהירות עד לרכות מושלמת. מוגשים עם ביצים, סחוג ורסק עגבניות על חשבון הבית — חוויה תימנית אותנטית.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["פרווה"],
     sortOrder: 2,
-    imagePath: "/menu/jachnun-parve.png",
+    imagePath: "/menu/jachnun-parve.webp",
   },
   {
     id: "pastry-kubaneh",
@@ -387,12 +353,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "קובנה משובחת",
     description: "קובנות לשבתות ואירועים — בהזמנה מראש.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["הזמנה מראש"],
     sortOrder: 3,
-    imagePath: "/menu/kubaneh-shabbat.png",
+    imagePath: "/menu/kubaneh-shabbat.webp",
   },
   {
     id: "pastry-sabaya",
@@ -401,12 +366,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "סאבייה משובחת פרווה של דודה יונה — שכבות דקיקות וזהובות, לשבתות ואירועים. בהזמנה מראש.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["פרווה", "הזמנה מראש"],
     sortOrder: 4,
-    imagePath: "/menu/sabaya-meshubachat.png",
+    imagePath: "/menu/sabaya-meshubachat.webp",
   },
   {
     id: "pastry-zalabiya",
@@ -414,12 +378,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "זלביות",
     description: "זלביות — מאפה תימני משובח, זהוב ופריך.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 5,
-    imagePath: "/menu/zalabiya.png",
+    imagePath: "/menu/zalabiya.webp",
   },
   {
     id: "pastry-malawach-ziva",
@@ -428,12 +391,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "ארוחת מלווח וזיוות — מוגשת עם ביצים, רסק עגבניות ותוספות.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 6,
-    imagePath: "/menu/malawach-ziva.png",
+    imagePath: "/menu/malawach-ziva.webp",
   },
   {
     id: "pastry-malawach",
@@ -441,12 +403,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מלווח תימני מקורי",
     description: "מלווח תימני מקורי — מוגש עם תוספות.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["מומלץ"],
     sortOrder: 7,
-    imagePath: "/menu/malawach-ziva.png",
+    imagePath: "/menu/malawach-ziva.webp",
   },
   {
     id: "pastry-saluf",
@@ -455,12 +416,11 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "סלוף טרי למשפחה ליום שישי — בהזמנה מראש של 10 חתיכות ומעלה, החל מיום רביעי.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["הזמנה מראש", "מ־10 חתיכות"],
     sortOrder: 8,
-    imagePath: "/menu/saluf-mishpacha.png",
+    imagePath: "/menu/saluf-mishpacha.webp",
   },
   {
     id: "pastry-lachuch-family",
@@ -469,7 +429,6 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "כמות לחוח למשפחה ליום שישי. בהזמנה מראש בימי רביעי–חמישי.",
     categoryId: "pastries",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: true,
     badges: ["הזמנה מראש"],
@@ -481,11 +440,10 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "מעורב חומוס",
     description: "מעורב חומוס עם פול ופלפל תימני.",
     categoryId: "sides",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 1,
-    imagePath: "/menu/hummus-meurav.png",
+    imagePath: "/menu/hummus-meurav.webp",
   },
   {
     id: "side-lachuch",
@@ -493,7 +451,6 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "לחוח",
     description: "לחם תימני ספוגי וטרי.",
     categoryId: "sides",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 2,
@@ -504,7 +461,6 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "סחוג אדום או ירוק",
     description: "סחוג תימני חריף — אדום או ירוק.",
     categoryId: "sides",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 3,
@@ -515,7 +471,6 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "חילבה",
     description: "ממרח חילבה מסורתי.",
     categoryId: "sides",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 4,
@@ -526,53 +481,21 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "סלט ירקות תימני",
     description: "סלט ירקות טרי בסגנון תימני.",
     categoryId: "sides",
-    priceAgorot: 0,
     isAvailable: true,
     isFeatured: false,
     sortOrder: 5,
   },
 ];
 
-/** סדר מומלצים בדף הבית — מנות פופולריות קודם */
-const HOME_FEATURED_SLUGS = [
-  "jachnun-parve",
-  "kubaneh",
-  "meurav-maafim-temani",
-  "marak-temani",
-] as const;
+/** תוספות על חשבון הבית לפי קטגוריה (לפי חומרי הלקוח) — מוצג כ«מוגש עם» */
+const SERVED_WITH_BY_CATEGORY: Record<string, string[]> = {
+  soups: ["חילבה", "סחוג", "לחוח", "סלוף", "ירקות"],
+  merakim: ["חילבה", "סחוג", "לחוח", "סלוף", "ירקות"],
+  pastries: ["ביצה", "סחוג", "רסק עגבניות"],
+  "maafim-temaniim": ["ביצה", "סחוג", "רסק עגבניות"],
+};
 
-export function getFeaturedItems(limit = 4): MenuItem[] {
-  const available = MENU_ITEMS.filter((i) => i.isAvailable);
-  const bySlug = new Map(available.map((item) => [item.slug, item]));
-
-  const curated = HOME_FEATURED_SLUGS.map((slug) => bySlug.get(slug)).filter(
-    (item): item is MenuItem => Boolean(item),
-  );
-
-  if (curated.length >= limit) {
-    return curated.slice(0, limit);
-  }
-
-  const curatedIds = new Set(curated.map((item) => item.id));
-  const extras = available
-    .filter((item) => item.isFeatured && !curatedIds.has(item.id))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
-
-  return [...curated, ...extras].slice(0, limit);
-}
-
-export function getItemsByCategory(categoryId: string): MenuItem[] {
-  return MENU_ITEMS.filter((i) => i.categoryId === categoryId).sort(
-    (a, b) => a.sortOrder - b.sortOrder,
-  );
-}
-
-export function formatMenuPrice(priceAgorot: number | null | undefined): string {
-  const agorot = priceAgorot ?? 0;
-  return new Intl.NumberFormat("he-IL", {
-    style: "currency",
-    currency: "ILS",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(agorot / 100);
+export function getServedWith(categoryKey: string | null | undefined): string[] {
+  if (!categoryKey) return [];
+  return SERVED_WITH_BY_CATEGORY[categoryKey] ?? [];
 }

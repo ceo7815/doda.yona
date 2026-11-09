@@ -22,18 +22,16 @@ export function AdminLoginForm({
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {configError ? (
         <div
-          className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-ink"
+          className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-ink"
           role="alert"
         >
-          מערכת ההתחברות עדיין לא הוגדרה. מלאו את פרטי Supabase בקובץ{" "}
-          <code className="rounded bg-brand-100 px-1">.env.local</code> לפי{" "}
-          <code className="rounded bg-brand-100 px-1">.env.example</code>.
+          מערכת ההתחברות עדיין לא חוברה למסד הנתונים. פנו לצוות הפיתוח.
         </div>
       ) : null}
 
       {state.message ? (
         <div
-          className="rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger"
+          className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger"
           role="alert"
         >
           {state.message}

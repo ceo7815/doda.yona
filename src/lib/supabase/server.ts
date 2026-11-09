@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getPublicEnv, getServerEnv, isSupabaseConfigured } from "@/lib/env";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getPublicEnv, isSupabaseConfigured } from "@/lib/env";
 
 /**
  * לקוח Supabase לשרת (Server Components / Server Actions) עם cookies.
@@ -33,30 +32,6 @@ export async function createClient() {
             // set מתוך Server Component — מותר להתעלם; middleware ירענן session
           }
         },
-      },
-    },
-  );
-}
-
-/**
- * Service role — שרת בלבד, לפעולות מערכת מבוקרות.
- * אין לייבא מודול זה ל-Client Components.
- */
-export function createServiceRoleClient() {
-  const env = getServerEnv();
-  if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error(
-      "Service Role אינו מוגדר. הוסיפו SUPABASE_SERVICE_ROLE_KEY ל-.env.local (שרת בלבד).",
-    );
-  }
-
-  return createServiceClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
       },
     },
   );

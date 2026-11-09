@@ -1,63 +1,36 @@
-"use client";
-
 import Link from "next/link";
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { Container } from "@/components/ui/container";
-import { SectionBanner } from "@/components/brand/ornaments";
+import { SectionHeading } from "@/components/brand/ornaments";
 import { MenuItemCard } from "@/components/menu/menu-item-card";
+import { Reveal } from "@/components/site/reveal";
 import type { MenuItem } from "@/data/catalog";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 type FeaturedSectionProps = {
   items: MenuItem[];
+  title: string;
+  subtitle: string;
 };
 
-export function FeaturedSection({ items }: FeaturedSectionProps) {
-  const rootRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
-
-      gsap.from(".featured-item", {
-        y: 32,
-        opacity: 0,
-        duration: 0.65,
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: "top 78%",
-        },
-      });
-    },
-    { scope: rootRef },
-  );
-
+export function FeaturedSection({ items, title, subtitle }: FeaturedSectionProps) {
+  if (items.length === 0) return null;
   return (
-    <section ref={rootRef} className="surface-paper py-12 sm:py-20 lg:py-24">
+    <section className="surface-paper section-y" aria-labelledby="featured-title">
       <Container>
-        <SectionBanner title="חלק מהתפריט המושלם שלנו" />
-        <p className="mx-auto mt-4 max-w-lg px-1 text-center text-sm font-light text-ink-muted sm:mt-5 sm:text-lg">
-          המנות שהאורחים חוזרים בשבילן — מרקים עשירים, לחוח טרי ומאפים תימניים.
-        </p>
+        <Reveal>
+          <SectionHeading id="featured-title" eyebrow="מהמטבח של דודה יונה" title={title} subtitle={subtitle} />
+        </Reveal>
 
-        <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:mt-12 sm:gap-6 xl:grid-cols-4">
-          {items.map((item) => (
-            <li key={item.id} className="featured-item">
-              <MenuItemCard item={item} compact />
-            </li>
+        <ul className="mt-9 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-6 lg:grid-cols-4">
+          {items.map((item, index) => (
+            <Reveal as="li" key={item.id} delay={index * 80}>
+              <MenuItemCard item={item} />
+            </Reveal>
           ))}
         </ul>
 
-        <div className="mt-8 text-center sm:mt-12">
-          <Link href="/menu" className="btn-deep w-full max-w-xs px-8 sm:w-auto">
-            לתפריט והזמנות אונליין
+        <div className="mt-9 text-center sm:mt-12">
+          <Link href="/menu" className="btn-deep min-h-12 w-full max-w-xs px-8 sm:w-auto">
+            לכל המנות בתפריט
           </Link>
         </div>
       </Container>
