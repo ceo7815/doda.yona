@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Eye, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { ConfirmSubmit } from "@/components/admin/confirm-submit";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { SupabaseNotice } from "@/components/admin/supabase-notice";
-import { Button } from "@/components/ui/button";
-import { formatAdminPrice, isMissingTableError } from "@/lib/admin/format";
+import { StatusPill } from "@/components/admin/ui";
+import { isMissingTableError } from "@/lib/admin/format";
+import { resolveMediaUrl } from "@/lib/media";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
-import { deleteProduct, toggleProductAvailability } from "./actions";
+import { deleteProduct, toggleProductFlag } from "./actions";
 import { ProductForm, type ProductFormValues } from "./product-form";
 
 export const metadata: Metadata = {
@@ -19,191 +22,148 @@ type ProductRow = {
   name: string;
   slug: string;
   description: string | null;
-  price_agorot: number;
+  image_path: string | null;
   sort_order: number;
   is_available: boolean;
   is_featured: boolean;
-  badges: string[];
+  badges: string[] | null;
   category_id: string;
-  categories: { name: string } | { name: string }[] | null;
 };
-
-function categoryName(categories: ProductRow["categories"]): string {
-  if (!categories) return "—";
-  if (Array.isArray(categories)) return categories[0]?.name ?? "—";
-  return categories.name;
-}
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; new?: string }>;
 }) {
-  const { edit } = await searchParams;
+  const { edit, new: isNew } = await searchParams;
   const configured = isSupabaseConfigured();
 
   let products: ProductRow[] = [];
   let categories: { id: string; name: string }[] = [];
   let dbError: string | null = null;
-  let editing: ProductFormValues | undefined;
 
   if (configured) {
     const supabase = await createClient();
-
     const [productsResult, categoriesResult] = await Promise.all([
       supabase
         .from("products")
-        .select(
-          "id, name, slug, description, price_agorot, sort_order, is_available, is_featured, badges, category_id, categories(name)",
-        )
+        .select("id, name, slug, description, image_path, sort_order, is_available, is_featured, badges, category_id")
         .is("deleted_at", null)
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true }),
-      supabase
-        .from("categories")
-        .select("id, name")
-        .is("deleted_at", null)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true }),
+      supabase.from("categories").select("id, name").is("deleted_at", null).order("sort_order", { ascending: true }),
     ]);
-
     if (productsResult.error) {
-      dbError = isMissingTableError(productsResult.error)
-        ? "טבלת המנות עדיין לא קיימת. הריצו את המיגרציות."
-        : "לא ניתן לטעון מנות.";
+      dbError = isMissingTableError(productsResult.error) ? "טבלת המנות עדיין לא קיימת." : "לא ניתן לטעון מנות.";
     } else {
       products = productsResult.data ?? [];
       categories = categoriesResult.data ?? [];
-
-      if (edit) {
-        const row = products.find((p) => p.id === edit);
-        if (row) {
-          editing = {
-            id: row.id,
-            categoryId: row.category_id,
-            name: row.name,
-            slug: row.slug,
-            description: row.description ?? "",
-            priceAgorot: row.price_agorot,
-            sortOrder: row.sort_order,
-            isAvailable: row.is_available,
-            isFeatured: row.is_featured,
-            badges: row.badges ?? [],
-          };
-        }
-      }
     }
   }
 
+  const row = edit ? products.find((p) => p.id === edit) : undefined;
+  const editing: ProductFormValues | undefined = row
+    ? {
+        id: row.id,
+        categoryId: row.category_id,
+        name: row.name,
+        slug: row.slug,
+        description: row.description ?? "",
+        imagePath: row.image_path,
+        sortOrder: row.sort_order,
+        isAvailable: row.is_available,
+        isFeatured: row.is_featured,
+        badges: row.badges ?? [],
+      }
+    : undefined;
+  const showForm = Boolean(editing) || isNew === "1";
+
+  const groups = categories
+    .map((c) => ({ ...c, items: products.filter((p) => p.category_id === c.id) }))
+    .filter((g) => g.items.length > 0);
+
   return (
-    <div className="space-y-6">
+    <>
       <AdminPageHeader
         title="מנות"
-        description="ניהול מנות התפריט — מחירים, זמינות ותגיות."
+        description={`${products.length} מנות · ${products.filter((p) => p.is_available).length} מוצגות באתר`}
+        actions={
+          configured && !showForm ? (
+            <Link
+              href="/admin/products?new=1"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-brand-900 px-5 font-bold text-gold-400 shadow-md hover:bg-brand-800"
+            >
+              <Plus className="size-4" aria-hidden />
+              מנה חדשה
+            </Link>
+          ) : null
+        }
       />
 
       {!configured ? <SupabaseNotice /> : null}
-      {dbError ? (
-        <div className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
-          {dbError}
-        </div>
-      ) : null}
+      {dbError ? <p className="rounded-xl bg-warning/10 px-4 py-3 text-sm">{dbError}</p> : null}
 
-      {configured && !dbError ? (
-        <>
-          <ProductForm
-            key={editing?.id ?? "new"}
-            categories={categories}
-            initial={editing}
-          />
+      {showForm ? <ProductForm key={editing?.id ?? "new"} categories={categories} initial={editing} /> : null}
 
-          <section className="rounded-md border border-border">
-            <div className="border-b border-border px-4 py-3">
-              <h2 className="font-bold text-ink">
-                {products.length === 0 ? "אין מנות עדיין" : `${products.length} מנות`}
-              </h2>
-            </div>
-
-            {products.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-ink-muted">
-                הוסיפו מנות לאחר יצירת קטגוריות. מחיר 0 יוצג באתר כ&quot;לבירור&quot;.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-brand-50 text-start">
-                      <th className="px-4 py-2 font-medium">שם</th>
-                      <th className="px-4 py-2 font-medium">קטגוריה</th>
-                      <th className="px-4 py-2 font-medium">מחיר</th>
-                      <th className="px-4 py-2 font-medium">זמינות</th>
-                      <th className="px-4 py-2 font-medium">פעולות</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.id} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-ink">
-                            {product.name}
-                            {product.is_featured ? (
-                              <span className="ms-2 text-xs text-gold-600">★ מומלצת</span>
-                            ) : null}
-                          </p>
-                          {product.badges?.length ? (
-                            <p className="text-xs text-ink-muted">
-                              {product.badges.join(" · ")}
-                            </p>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3">
-                          {categoryName(product.categories)}
-                        </td>
-                        <td className="px-4 py-3 font-medium">
-                          {formatAdminPrice(product.price_agorot)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <form action={toggleProductAvailability}>
-                            <input type="hidden" name="id" value={product.id} />
-                            <input
-                              type="hidden"
-                              name="isAvailable"
-                              value={String(!product.is_available)}
-                            />
-                            <Button
-                              type="submit"
-                              size="sm"
-                              variant={product.is_available ? "secondary" : "outline"}
-                            >
-                              {product.is_available ? "זמינה" : "לא זמינה"}
-                            </Button>
-                          </form>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Link
-                              href={`/admin/products?edit=${product.id}`}
-                              className="text-sm text-brand-700 underline"
-                            >
-                              עריכה
-                            </Link>
-                            <form action={deleteProduct}>
-                              <input type="hidden" name="id" value={product.id} />
-                              <Button type="submit" size="sm" variant="ghost" className="text-danger">
-                                הסרה
-                              </Button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </>
-      ) : null}
-    </div>
+      {groups.map((group) => (
+        <section key={group.id} className="space-y-3">
+          <h2 className="flex items-center gap-2 text-sm font-extrabold tracking-wide text-gold-700">
+            {group.name}
+            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs text-ink-muted">{group.items.length}</span>
+          </h2>
+          <ul className="overflow-hidden rounded-2xl border border-border/80 bg-surface-elevated">
+            {group.items.map((p) => {
+              const img = resolveMediaUrl(p.image_path);
+              return (
+                <li key={p.id} className="flex items-center gap-3 border-b border-border/60 px-3 py-3 last:border-0 sm:gap-4 sm:px-4">
+                  <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-brand-50 sm:size-16">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- תמונה קטנה באדמין
+                      <img src={img} alt="" loading="lazy" className={`size-full object-cover ${p.is_available ? "" : "opacity-40 grayscale"}`} />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1.5 truncate font-bold text-brand-900">
+                      {p.name}
+                      {p.is_featured ? <Star className="size-3.5 shrink-0 fill-gold-500 text-gold-500" aria-label="מומלצת" /> : null}
+                    </p>
+                    <div className="mt-1">
+                      <StatusPill on={p.is_available} onLabel="מוצגת" offLabel="מוסתרת" />
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <form action={toggleProductFlag}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="flag" value="is_available" />
+                      <input type="hidden" name="value" value={String(!p.is_available)} />
+                      <button type="submit" className="admin-icon-btn" aria-label={p.is_available ? "הסתרה מהאתר" : "הצגה באתר"} title={p.is_available ? "הסתרה מהאתר" : "הצגה באתר"}>
+                        {p.is_available ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                      </button>
+                    </form>
+                    <form action={toggleProductFlag} className="hidden sm:block">
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="flag" value="is_featured" />
+                      <input type="hidden" name="value" value={String(!p.is_featured)} />
+                      <button type="submit" className="admin-icon-btn" aria-label={p.is_featured ? "הסרה מהמומלצות" : "סימון כמומלצת"} title={p.is_featured ? "הסרה מהמומלצות" : "סימון כמומלצת"}>
+                        <Star className={`size-4 ${p.is_featured ? "fill-gold-500 text-gold-500" : ""}`} aria-hidden />
+                      </button>
+                    </form>
+                    <Link href={`/admin/products?edit=${p.id}`} className="admin-icon-btn" aria-label={`עריכת ${p.name}`} title="עריכה">
+                      <Pencil className="size-4" aria-hidden />
+                    </Link>
+                    <form action={deleteProduct}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <ConfirmSubmit className="admin-icon-btn text-danger" label={`מחיקת ${p.name}`} message={`למחוק את «${p.name}»? המנה תוסר מהאתר.`}>
+                        <Trash2 className="size-4" aria-hidden />
+                      </ConfirmSubmit>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </>
   );
 }

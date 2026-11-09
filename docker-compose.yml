@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://dodayona.hub.co.il}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_ORDER_URL: ${NEXT_PUBLIC_ORDER_URL:-}
     ports:
       - "8081:8080"
     environment:
@@ -12,7 +15,4 @@ services:
       - PORT=8080
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://dodayona.hub.co.il}
-      - WHATSAPP_PROVIDER=${WHATSAPP_PROVIDER:-demo}
-      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-demo}
-      - POS_PROVIDER=${POS_PROVIDER:-demo}
     restart: unless-stopped

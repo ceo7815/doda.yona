@@ -91,7 +91,12 @@ export function logServerError(context: string, error: unknown): void {
       ? { code: error.code, message: error.message, details: error.details }
       : error instanceof Error
         ? { name: error.name, message: error.message }
-        : { error: "unknown" };
+        : typeof error === "object" && error !== null && "message" in error
+          ? {
+              code: (error as { code?: unknown }).code,
+              message: String((error as { message?: unknown }).message),
+            }
+          : { error: "unknown" };
 
   console.error(`[${context}]`, safe);
 }

@@ -6,10 +6,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * כל הנתיבים חוץ מקבצים סטטיים ו-images של Next
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  // רק אזור הניהול — העמודים הציבוריים לא מחכים לבדיקת התחברות
+  matcher: ["/admin/:path*"],
 };

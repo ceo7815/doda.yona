@@ -52,3 +52,57 @@ export function SectionBanner({
     </div>
   );
 }
+
+/** כותרת מקטע אחידה: שורת עליונה קטנה, כותרת, קישוט זהב ותת־כותרת */
+export function SectionHeading({
+  id,
+  eyebrow,
+  title,
+  subtitle,
+  tone = "light",
+  align = "center",
+  className,
+}: {
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  tone?: "light" | "dark";
+  align?: "center" | "start";
+  className?: string;
+}) {
+  const dark = tone === "dark";
+  return (
+    <div
+      className={cn(
+        "flex flex-col",
+        align === "center" ? "items-center text-center" : "items-center text-center lg:items-start lg:text-start",
+        className,
+      )}
+    >
+      {eyebrow ? (
+        <p className={cn("eyebrow", dark ? "text-gold-500" : "text-gold-700")}>{eyebrow}</p>
+      ) : null}
+      <h2
+        id={id}
+        className={cn(
+          "mt-2 text-balance text-[1.65rem] font-black leading-tight tracking-tight sm:text-4xl",
+          dark ? "text-gold-300" : "text-brand-900",
+        )}
+      >
+        {title}
+      </h2>
+      <GoldFlourish className={cn("mt-3", dark ? "text-gold-500/80" : "text-gold-500")} />
+      {subtitle ? (
+        <p
+          className={cn(
+            "mt-3 max-w-xl text-pretty text-[0.95rem] font-light leading-relaxed sm:text-lg",
+            dark ? "text-brand-200" : "text-ink-muted",
+          )}
+        >
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
+  );
+}

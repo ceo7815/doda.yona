@@ -36,21 +36,32 @@ function readStored(): A11ySettings {
   }
 }
 
+/** אם ה-state עדיין בברירת מחדל — נטען מה-localStorage לפני מיזוג */
+function hydratedRef(prev: A11ySettings): A11ySettings {
+  return prev === DEFAULT_A11Y ? readStored() : prev;
+}
+
 export function AccessibilityProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [settings, setSettingsState] = useState<A11ySettings>(DEFAULT_A11Y);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelOpen, setPanelOpenState] = useState(false);
+  // ההגדרות השמורות כבר הוחלו על המסמך בסקריפט האתחול (layout);
+  // הן נטענות ל-state רק כשהמשתמש פותח את הפאנל — בלי setState בתוך effect.
   const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
-    const stored = readStored();
-    setSettingsState(stored);
-    applyA11yToDocument(stored);
-    setHydrated(true);
-  }, []);
+  const setPanelOpen = useCallback(
+    (open: boolean) => {
+      if (open && !hydrated) {
+        setSettingsState(readStored());
+        setHydrated(true);
+      }
+      setPanelOpenState(open);
+    },
+    [hydrated],
+  );
 
   useEffect(() => {
     if (!hydrated) return;
@@ -67,7 +78,7 @@ export function AccessibilityProvider({
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPanelOpen(false);
+      if (e.key === "Escape") setPanelOpenState(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -77,10 +88,12 @@ export function AccessibilityProvider({
   }, [panelOpen]);
 
   const setSettings = useCallback((next: Partial<A11ySettings>) => {
-    setSettingsState((prev) => ({ ...prev, ...next }));
+    setHydrated(true);
+    setSettingsState((prev) => ({ ...(hydratedRef(prev)), ...next }));
   }, []);
 
   const reset = useCallback(() => {
+    setHydrated(true);
     setSettingsState(DEFAULT_A11Y);
   }, []);
 
@@ -92,7 +105,7 @@ export function AccessibilityProvider({
       panelOpen,
       setPanelOpen,
     }),
-    [settings, setSettings, reset, panelOpen],
+    [settings, setSettings, reset, panelOpen, setPanelOpen],
   );
 
   return (

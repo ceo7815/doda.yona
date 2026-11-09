@@ -1,19 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ExternalLink, LogOut } from "lucide-react";
 import { logoutAdmin } from "@/lib/auth/actions";
 import { requireAdmin } from "@/lib/auth/admin";
 import { getRestaurantName } from "@/lib/env";
-import { Button } from "@/components/ui/button";
 import { AppError } from "@/lib/errors";
-
-const ADMIN_NAV = [
-  { href: "/admin", label: "דשבורד" },
-  { href: "/admin/categories", label: "קטגוריות" },
-  { href: "/admin/products", label: "מנות" },
-  { href: "/admin/orders", label: "הזמנות" },
-  { href: "/admin/delivery-zones", label: "אזורי משלוח" },
-  { href: "/admin/customers", label: "לקוחות" },
-] as const;
+import { AdminNav } from "@/components/admin/admin-nav";
 
 export default async function AdminDashboardLayout({
   children,
@@ -38,46 +30,63 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-brand-50 md:flex-row">
-      <aside className="no-print border-b border-border bg-brand-900 text-brand-50 md:w-60 md:border-b-0 md:border-e">
-        <div className="px-4 py-5">
-          <p className="text-xs text-brand-300">ניהול</p>
-          <p className="font-[family-name:var(--font-rubik)] text-lg font-bold">
-            {name}
-          </p>
-          <p className="mt-1 truncate text-xs text-brand-200" dir="ltr">
+    <div className="min-h-dvh bg-[#f6f1e8] lg:flex">
+      {/* סרגל צד — דסקטופ */}
+      <aside className="no-print sticky top-0 hidden h-dvh w-64 shrink-0 flex-col bg-brand-900 px-4 py-6 text-brand-50 lg:flex">
+        <Link href="/admin" className="px-2">
+          <span className="block text-2xl font-black text-gold-gradient">{name}</span>
+          <span className="mt-0.5 block text-xs font-medium tracking-[0.18em] text-brand-300">ניהול האתר</span>
+        </Link>
+        <div className="mt-8 flex-1">
+          <AdminNav variant="sidebar" />
+        </div>
+        <div className="space-y-1 border-t border-white/10 pt-4">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm text-brand-200 hover:bg-white/5 hover:text-gold-300"
+          >
+            <ExternalLink className="size-4" aria-hidden />
+            צפייה באתר
+          </Link>
+          <form action={logoutAdmin}>
+            <button
+              type="submit"
+              className="flex min-h-10 w-full items-center gap-2 rounded-xl px-3 text-sm text-brand-200 hover:bg-white/5 hover:text-gold-300"
+            >
+              <LogOut className="size-4" aria-hidden />
+              התנתקות
+            </button>
+          </form>
+          <p className="truncate px-3 pt-2 text-xs text-brand-400" dir="ltr">
             {admin.email}
           </p>
         </div>
-        <nav aria-label="תפריט ניהול" className="flex flex-col gap-0.5 px-2 pb-4">
-          {ADMIN_NAV.map((item, index) => (
-            <Link
-              key={`${item.label}-${index}`}
-              href={item.href}
-              className="rounded-md px-3 py-2.5 text-sm hover:bg-brand-800"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <form action={logoutAdmin} className="border-t border-brand-800 p-3">
-          <Button
-            type="submit"
-            variant="ghost"
-            className="w-full justify-start text-brand-100 hover:bg-brand-800 hover:text-white"
-          >
-            התנתקות
-          </Button>
-        </form>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="no-print flex min-h-14 items-center border-b border-border bg-surface-elevated px-4">
-          <Link href="/" className="text-sm text-brand-700 underline">
-            חזרה לאתר
+
+      {/* סרגל עליון — מובייל */}
+      <header className="no-print sticky top-0 z-30 bg-brand-900 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] text-brand-50 shadow-md lg:hidden">
+        <div className="flex items-center justify-between pb-3">
+          <Link href="/admin" className="text-xl font-black text-gold-gradient">
+            {name} · ניהול
           </Link>
-        </header>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
-      </div>
+          <div className="flex items-center gap-1">
+            <Link href="/" target="_blank" className="inline-flex size-10 items-center justify-center rounded-xl text-brand-200 hover:bg-white/10" aria-label="צפייה באתר">
+              <ExternalLink className="size-[1.1rem]" aria-hidden />
+            </Link>
+            <form action={logoutAdmin}>
+              <button type="submit" className="inline-flex size-10 items-center justify-center rounded-xl text-brand-200 hover:bg-white/10" aria-label="התנתקות">
+                <LogOut className="size-[1.1rem]" aria-hidden />
+              </button>
+            </form>
+          </div>
+        </div>
+        <AdminNav variant="bar" />
+      </header>
+
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-10">
+        <div className="mx-auto max-w-5xl space-y-6">{children}</div>
+      </main>
     </div>
   );
 }

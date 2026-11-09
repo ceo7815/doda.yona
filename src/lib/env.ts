@@ -29,6 +29,8 @@ const publicEnvSchema = z.object({
   ),
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalNonEmpty,
+  /** קישור לדף ההזמנות של הקופה — ברירת מחדל אם לא הוגדר באדמין */
+  NEXT_PUBLIC_ORDER_URL: optionalUrl,
 });
 
 const serverEnvSchema = publicEnvSchema.extend({
@@ -37,9 +39,6 @@ const serverEnvSchema = publicEnvSchema.extend({
     emptyToUndefined,
     z.string().email().optional(),
   ),
-  WHATSAPP_PROVIDER: z.enum(["demo"]).default("demo"),
-  PAYMENT_PROVIDER: z.enum(["demo"]).default("demo"),
-  POS_PROVIDER: z.enum(["demo"]).default("demo"),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
@@ -51,6 +50,7 @@ function readPublicEnv(): PublicEnv {
     NEXT_PUBLIC_RESTAURANT_NAME: process.env.NEXT_PUBLIC_RESTAURANT_NAME,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_ORDER_URL: process.env.NEXT_PUBLIC_ORDER_URL,
   });
 }
 
@@ -68,9 +68,6 @@ export function getServerEnv(): ServerEnv {
     ...readPublicEnv(),
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     ADMIN_BOOTSTRAP_EMAIL: process.env.ADMIN_BOOTSTRAP_EMAIL,
-    WHATSAPP_PROVIDER: process.env.WHATSAPP_PROVIDER || "demo",
-    PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER || "demo",
-    POS_PROVIDER: process.env.POS_PROVIDER || "demo",
   });
 }
 

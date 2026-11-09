@@ -1,107 +1,141 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BadgeCheck, Clock, Mail, MapPin, MessageCircle, Navigation, Phone } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { PageHero } from "@/components/brand/page-hero";
-import { GoldFlourish } from "@/components/brand/ornaments";
+import { SectionHeading } from "@/components/brand/ornaments";
+import { OrderButton } from "@/components/site/order-button";
+import { HoursList } from "@/components/site/hours-list";
+import { SocialLinks } from "@/components/site/social-links";
+import { MapEmbed } from "@/components/site/map-embed";
+import { Reveal } from "@/components/site/reveal";
 import { RESTAURANT } from "@/data/catalog";
+import {
+  getAddressFull,
+  getLocationLabel,
+  getOrderLink,
+  toTelHref,
+  toWhatsAppHref,
+} from "@/lib/site-settings";
+import { getSiteSettings } from "@/services/content";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "צרו קשר",
-  description: `צרו קשר עם ${RESTAURANT.name} — ${RESTAURANT.addressFull}.`,
+  description: `צרו קשר עם ${RESTAURANT.name} — ${RESTAURANT.addressFull}. טלפון ${RESTAURANT.phoneDisplay}.`,
+  alternates: { canonical: "/contact" },
 };
 
-const DETAILS = [
-  { label: "כתובת", value: RESTAURANT.addressFull, note: RESTAURANT.locationLabel },
-  { label: "שירותים", value: RESTAURANT.services.join(" · ") },
-  { label: "כשרות", value: RESTAURANT.kashrut },
-  { label: "טלפון", value: "יעודכן בקרוב" },
-  { label: "שעות פעילות", value: "יעודכנו בקרוב" },
-  { label: "הערה", value: RESTAURANT.dineInNote },
-] as const;
+function Card({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-full gap-4 rounded-2xl border border-border/80 bg-surface-elevated p-5 shadow-[var(--shadow-card)]">
+      <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-900 text-gold-400">
+        <Icon className="size-5" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-xs font-bold tracking-[0.16em] text-gold-700">{title}</h3>
+        <div className="mt-1.5">{children}</div>
+      </div>
+    </div>
+  );
+}
 
-export default function ContactPage() {
-  const mapsQuery = encodeURIComponent(RESTAURANT.mapsQuery);
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
+  const order = getOrderLink(settings);
+  const address = getAddressFull(settings);
+  const mapsQuery = encodeURIComponent(address || RESTAURANT.mapsQuery);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
   const wazeUrl = `https://waze.com/ul?q=${mapsQuery}&navigate=yes`;
+  const telHref = toTelHref(settings.business.phoneDisplay);
+  const whatsappHref = settings.business.whatsapp ? toWhatsAppHref(settings.business.whatsapp) : null;
 
   return (
     <div>
-      <PageHero
-        priority
-        title="צרו קשר"
-        subtitle={`${RESTAURANT.addressFull} · ${RESTAURANT.locationLabel}`}
-      />
+      <PageHero priority eyebrow={RESTAURANT.name} title="צרו קשר" subtitle={`${address} · ${getLocationLabel(settings)}`} />
 
-      <div className="surface-paper w-full px-3 py-8 sm:px-6 sm:py-14 lg:px-8 xl:px-10">
-        <Container className="max-w-4xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-bold tracking-[0.22em] text-gold-700">
-              {RESTAURANT.name}
-            </p>
-            <h2 className="mt-2 text-xl font-black tracking-tight text-brand-900 sm:text-3xl">
-              פרטי המסעדה
-            </h2>
-            <GoldFlourish className="mx-auto mt-3" />
-            <p className="mt-4 text-sm font-light leading-relaxed text-ink-muted sm:text-base">
-              נשמח לארח אתכם בכרם התימנים — למשלוח, לאיסוף, או לאכילה במקום
-              בהזמנה מראש.
-            </p>
+      <div className="surface-paper section-y">
+        <Container className="max-w-5xl">
+          <Reveal>
+            <SectionHeading
+              title="נשמח לארח אתכם"
+              subtitle={`בכרם התימנים — למשלוח, לאיסוף, או לאכילה במקום. ${settings.business.dineInNote}`}
+            />
+          </Reveal>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            <Reveal>
+              <Card icon={MapPin} title="כתובת">
+                <p className="text-lg font-extrabold text-brand-900">{address}</p>
+                <p className="text-sm text-ink-muted">{getLocationLabel(settings)}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a href={wazeUrl} target="_blank" rel="noopener noreferrer" className="chip-link">
+                    <Navigation className="size-3.5" aria-hidden />
+                    Waze
+                  </a>
+                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="chip-link">
+                    <MapPin className="size-3.5" aria-hidden />
+                    Google Maps
+                  </a>
+                </div>
+              </Card>
+            </Reveal>
+            <Reveal delay={80}>
+              <Card icon={Phone} title="טלפון">
+                <a href={telHref} className="text-2xl font-black tracking-wide text-brand-900 hover:text-gold-700" dir="ltr">
+                  {settings.business.phoneDisplay}
+                </a>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {whatsappHref ? (
+                    <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="chip-link">
+                      <MessageCircle className="size-3.5" aria-hidden />
+                      וואטסאפ
+                    </a>
+                  ) : null}
+                  {settings.business.email ? (
+                    <a href={`mailto:${settings.business.email}`} className="chip-link" dir="ltr">
+                      <Mail className="size-3.5" aria-hidden />
+                      {settings.business.email}
+                    </a>
+                  ) : null}
+                </div>
+              </Card>
+            </Reveal>
+            <Reveal delay={120}>
+              <Card icon={BadgeCheck} title="כשרות ושירותים">
+                <p className="font-extrabold text-brand-900">{settings.business.kashrut}</p>
+                <p className="mt-1 text-sm text-ink-muted">{RESTAURANT.services.join(" · ")}</p>
+              </Card>
+            </Reveal>
+            <Reveal delay={160}>
+              <Card icon={Clock} title="שעות פעילות">
+                <HoursList hours={settings.hours} note={settings.hoursNote} telHref={telHref} />
+              </Card>
+            </Reveal>
           </div>
 
-          <ul className="mx-auto mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5">
-            {DETAILS.map((item) => (
-              <li
-                key={item.label}
-                className="rounded-2xl border border-border/80 bg-surface-elevated px-4 py-3.5 text-center shadow-[var(--shadow-card)] sm:px-5 sm:py-4 sm:text-start"
-              >
-                <p className="text-[0.68rem] font-bold tracking-[0.18em] text-gold-700">
-                  {item.label}
-                </p>
-                <p className="mt-1.5 text-sm font-extrabold text-brand-900 sm:mt-2 sm:text-base">
-                  {item.value}
-                </p>
-                {"note" in item && item.note ? (
-                  <p className="mt-1 text-sm font-light text-ink-muted">
-                    {item.note}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          <Reveal className="mt-8">
+            <MapEmbed query={address || RESTAURANT.mapsQuery} title={`מפה — ${address}`} />
+          </Reveal>
 
-          <div className="mt-7 flex flex-col items-stretch gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
-            <a
-              href={wazeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-deep w-full px-7 sm:w-auto"
-            >
-              ניווט ב-Waze
-            </a>
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-[var(--radius-lg)] border border-brand-900/15 bg-surface-elevated px-7 text-sm font-bold text-brand-900 transition-colors hover:border-gold-500/40 hover:bg-brand-50 sm:w-auto"
-            >
-              Google Maps
-            </a>
-          </div>
-
-          <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-brand-900/10 bg-brand-900 px-5 py-8 text-center shadow-[var(--shadow-md)] sm:mt-12 sm:rounded-[1.75rem] sm:px-10 sm:py-9">
-            <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-500">
-              הזמנות אונליין
-            </p>
-            <h3 className="mt-2 text-xl font-black text-gold-400 sm:text-2xl">
-              רוצים להזמין?
-            </h3>
-            <p className="mx-auto mt-3 max-w-md text-sm font-light leading-relaxed text-brand-200">
-              הוסיפו מנות לסל ואשרו הזמנה אונליין — משלוח או איסוף עצמי.
-            </p>
-            <Link href="/menu" className="btn-gold mt-6 inline-flex w-full max-w-xs justify-center px-9 sm:mt-7">
-              לתפריט ולהזמנה
-            </Link>
-          </div>
+          <Reveal className="mt-12">
+            <div className="mx-auto max-w-2xl rounded-[1.75rem] bg-brand-900 px-6 py-9 text-center shadow-[var(--shadow-lg)] sm:px-10">
+              <p className="eyebrow text-gold-500">רוצים להזמין?</p>
+              <h2 className="mt-2 text-2xl font-black text-gold-300 sm:text-3xl">משלוח · איסוף · שולחן</h2>
+              <div className="mt-6 flex justify-center">
+                <OrderButton order={order} className="min-h-12 w-full max-w-xs px-9" />
+              </div>
+              <SocialLinks social={settings.social} className="mt-6 justify-center" />
+            </div>
+          </Reveal>
         </Container>
       </div>
     </div>

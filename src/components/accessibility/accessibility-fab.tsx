@@ -31,7 +31,7 @@ export function AccessibilityFab() {
     useAccessibility();
 
   return (
-    <div className="no-print fixed start-auto end-auto left-3 top-1/2 z-[60] -translate-y-1/2 sm:left-4">
+    <div className="no-print fixed start-auto end-auto bottom-[calc(var(--mobile-order-bar)+0.75rem)] left-3 z-[60] sm:left-4 lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2">
       <button
         type="button"
         onClick={() => setPanelOpen(!panelOpen)}

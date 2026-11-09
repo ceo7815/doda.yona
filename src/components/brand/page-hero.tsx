@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { GoldFlourish } from "@/components/brand/ornaments";
 
 /** תמונת רקע נקייה לחלק העליון — לא בדף הבית */
-export const PAGE_HERO_IMAGE = "/brand/inner-hero.png";
+export const PAGE_HERO_IMAGE = "/brand/page-hero.webp";
 
 type PageHeroProps = {
   title: string;
@@ -15,7 +15,7 @@ type PageHeroProps = {
   priority?: boolean;
 };
 
-/** Hero צר לכל העמודים הפנימיים: תמונה נקייה + כותרת העמוד בלבד */
+/** Hero לעמודים הפנימיים: תמונת אווירה + כותרת העמוד */
 export function PageHero({
   title,
   subtitle,
@@ -27,45 +27,42 @@ export function PageHero({
   return (
     <header
       className={cn(
-        "relative overflow-hidden page-pad-top px-1 pb-6 pt-5 text-center sm:pb-9 sm:pt-7",
+        "relative isolate overflow-hidden bg-brand-900 page-pad-top pb-10 text-center sm:pb-14",
         className,
       )}
     >
-      <div className="absolute inset-0" aria-hidden>
+      <div className="absolute inset-0 -z-10" aria-hidden>
         <Image
           src={PAGE_HERO_IMAGE}
           alt=""
           fill
           priority={priority}
-          className="object-cover object-[center_40%] sm:object-center"
+          className="scale-105 object-cover object-[center_40%] blur-[1.5px]"
           sizes="100vw"
-          quality={80}
+          quality={75}
         />
-        <div className="absolute inset-0 bg-brand-900/50 sm:bg-brand-900/45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-900/75 via-brand-900/55 to-brand-900/85" />
       </div>
 
-      <Container className="relative">
-        {eyebrow ? (
-          <p className="text-[0.68rem] font-bold tracking-[0.22em] text-gold-400 sm:text-xs sm:tracking-[0.28em]">
-            {eyebrow}
-          </p>
-        ) : null}
+      <Container className="hero-cta">
+        {eyebrow ? <p className="eyebrow text-gold-400">{eyebrow}</p> : null}
         <h1
           className={cn(
-            "text-[clamp(1.75rem,7vw,2.25rem)] font-black tracking-tight text-gold-400 sm:text-4xl",
-            eyebrow && "mt-1.5 sm:mt-2",
+            "text-balance text-[2.1rem] font-black leading-tight tracking-tight text-gold-gradient sm:text-5xl",
+            eyebrow && "mt-2",
           )}
         >
           {title}
         </h1>
-        <GoldFlourish className="mx-auto mt-2.5 text-gold-400 sm:mt-3" />
+        <GoldFlourish className="mx-auto mt-3 text-gold-400" />
         {subtitle ? (
-          <p className="mx-auto mt-2.5 max-w-lg px-1 text-sm font-light leading-relaxed text-white sm:mt-3 sm:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-pretty px-1 text-[0.95rem] font-light leading-relaxed text-brand-50/95 sm:text-lg">
             {subtitle}
           </p>
         ) : null}
         {children}
       </Container>
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-l from-transparent via-gold-500/60 to-transparent" aria-hidden />
     </header>
   );
 }

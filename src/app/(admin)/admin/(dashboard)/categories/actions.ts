@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { refreshPublicSite } from "@/lib/admin/revalidate";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin";
 import { slugify, isMissingTableError } from "@/lib/admin/format";
@@ -15,7 +15,7 @@ export type CategoryActionState = {
 };
 
 const categorySchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.guid().optional(),
   name: z.string().min(1, "שם הקטגוריה חובה"),
   slug: z.string().min(1, "כתובת (slug) חובה"),
   description: z.string().optional(),
@@ -95,7 +95,7 @@ export async function saveCategory(
     }
   }
 
-  revalidatePath("/admin/categories");
+  refreshPublicSite();
   return { ok: true, message: parsed.data.id ? "הקטגוריה עודכנה." : "הקטגוריה נוספה." };
 }
 
@@ -117,7 +117,7 @@ export async function toggleCategoryActive(formData: FormData): Promise<void> {
     throw new AppError("INTERNAL", { message: error.message });
   }
 
-  revalidatePath("/admin/categories");
+  refreshPublicSite();
 }
 
 export async function deleteCategory(formData: FormData): Promise<void> {
@@ -137,5 +137,5 @@ export async function deleteCategory(formData: FormData): Promise<void> {
     throw new AppError("INTERNAL", { message: error.message });
   }
 
-  revalidatePath("/admin/categories");
+  refreshPublicSite();
 }
